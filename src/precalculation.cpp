@@ -50,9 +50,6 @@ int main(){
     //RMQ auf LCP-Array erstellen
     rmq_succinct_sada<> rmq(&stats.lcp);
     
-    //double tadeus[] = {2.0 , 10.1 , 5.2 , 22.3, 1.1, 2.77};
-    //cout << median(tadeus) << endl;
-    
     int test = ANZAHL;                      //Anzahl der Tests aus denen Median bestimmt wird
     double timeLCPRMQ=0.0, timeLCP=0.0, timeNaiv=0.0, tstart;
     double arrLCPRMQ[test], arrLCP[test], arrNaiv[test];
@@ -68,22 +65,7 @@ int main(){
     }
     timeLCPRMQ = median(arrLCPRMQ);
     cout << "time lcprmq: " << timeLCPRMQ << endl;
-    
-    
-//     //Tests
-//     //naivCompTest(text, 0, 19);
-//     uint64_t l;
-//     uint64_t r;
-//     const char * abc = text.c_str();
-//     string aaa = "abcdefg;
-//     const char * bbb = aaa.c_str();
-//     l = (uint64_t)aaa;
-//     r = abc[2];
-//     cout << "------------------------" << endl;
-//     cout << l << " " << r << endl;
-//     cout << "------------------------" << endl;
-    
-    
+      
     
     //Dauer fuer naiven Zeichenvergleich
     size_t x = 0;
@@ -124,8 +106,8 @@ int main(){
     
     //in Datei schreiben
     ofstream fileout;
-    fileout.open("pizza.hpp"); //hier: "src/grenzwerte.hpp"
-    fileout << "constexpr size_t x = " << x << ";\nconstexpr size_t y = " << y << ";";             //hier grenzwerte eintragen
+    fileout.open("pizza.hpp"); 
+    fileout << "constexpr size_t x = " << x << ";\nconstexpr size_t y = " << y << ";"; 
     fileout.close();
     
 }
