@@ -57,7 +57,7 @@ int main(){
     }
     timeLCPRMQ = median(arrLCPRMQ);
     cout << "time lcprmq: " << timeLCPRMQ << endl;
-      
+    
     
     //Dauer fuer naiven Zeichenvergleich
     size_t x = 0;

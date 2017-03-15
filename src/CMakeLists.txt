@@ -1,5 +1,3 @@
-# add_executable (hello hallo.cpp)
-
 
 add_executable (precalc precalculation.cpp)
 target_link_libraries    (precalc -ldl)
