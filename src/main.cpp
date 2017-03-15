@@ -9,7 +9,7 @@
 #include "substring.hpp"
 #include "checked_vector.hpp"
 #include "gappedRepeats.cpp"
-#include "grenzwerte.hpp"
+#include "../build/src/grenzwerte.hpp"
 
 
 using namespace std;

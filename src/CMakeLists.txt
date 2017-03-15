@@ -9,9 +9,9 @@ target_link_libraries    (precalc ${CMAKE_THREAD_LIBS_INIT} )
 target_link_libraries    (precalc sdsl)
 
 
-add_custom_command ( 
+add_custom_command (
     TARGET precalc
-    COMMENT "backe pizza..."
+    COMMENT "bestimme grenzwerte..."
     COMMAND precalc
     DEPENDS precalc
 )
@@ -24,5 +24,6 @@ target_link_libraries    (gapRep2 gflags ${GFLAGS_LIBRARY})
 target_link_libraries    (gapRep2 ${CMAKE_THREAD_LIBS_INIT} )
 target_link_libraries    (gapRep2 sdsl)
 
+add_dependencies (gapRep2 precalc)
 
 

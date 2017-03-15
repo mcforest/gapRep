@@ -98,7 +98,7 @@ int main(){
     
     //in Datei schreiben
     ofstream fileout;
-    fileout.open("pizza.hpp"); 
+    fileout.open("grenzwerte.hpp"); 
     fileout << "constexpr size_t x = " << x << ";\nconstexpr size_t y = " << y << ";"; 
     fileout.close();
     
