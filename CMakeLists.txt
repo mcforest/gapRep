@@ -7,7 +7,7 @@ set(CXX_STANDARD c++11)
 set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -O0 -g3 -ggdb -fno-inline-functions")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -O3")
 include(AppendCompilerFlags)
-append_cxx_compiler_flags("-std=c++14 -ggdb3 -Wall -Wextra" "GCC" CMAKE_CXX_FLAGS)
+append_cxx_compiler_flags("-std=c++14 -ggdb3 -pedantic -Wshadow -Wall -Wextra" "GCC" CMAKE_CXX_FLAGS)
 
 # Usage: find_or_download_package(PACKAGE_NAME, FOUND_FLAG_PREFIX, TARGET_PREFIX)
 include(ExternalProject)

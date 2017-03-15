@@ -9,12 +9,12 @@ target_link_libraries    (precalc ${CMAKE_THREAD_LIBS_INIT} )
 target_link_libraries    (precalc sdsl)
 
 
-# add_custom_command ( 
-#     TARGET precalc
-#     COMMENT "backe pizza..."
-#     COMMAND precalc
-#     DEPENDS precalc
-# )
+add_custom_command ( 
+    TARGET precalc
+    COMMENT "backe pizza..."
+    COMMAND precalc
+    DEPENDS precalc
+)
 
 
 add_executable (gapRep2 main.cpp)
