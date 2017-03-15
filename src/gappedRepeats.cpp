@@ -17,7 +17,7 @@ using namespace sdsl;
 
 //vergleicht die Laenge der Arme ueber Zeichenvergleiche
 //i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
-int naivCompOld(string &text, size_t i, size_t j, size_t length){
+int naivCompOld(const string &text, size_t i, size_t j, size_t length){
     boost::string_ref l = text.substr(i,length);   //left arm
     boost::string_ref r = text.substr(j,length);   //right arm
     if ( l != r ){
@@ -35,7 +35,7 @@ int naivCompOld(string &text, size_t i, size_t j, size_t length){
 //vergleicht die Laenge der Arme ueber Zeichenvergleiche
 //nutzt word packing mit __int 128
 //i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
-int naivComp128(string &text, size_t i, size_t j){
+int naivComp128(const string &text, size_t i, size_t j){
     bool gr = 1;
     __int128 l;
     __int128 r;
@@ -99,7 +99,7 @@ int naivComp128(string &text, size_t i, size_t j){
 //vergleicht die Laenge der Arme ueber Zeichenvergleiche
 //nutzt word packing mit uint64_t
 //i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
-int naivComp(string &text, size_t i, size_t j){
+int naivComp(const string &text, size_t i, size_t j){
     bool gr = 1;
     uint64_t l;
     uint64_t r;

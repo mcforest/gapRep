@@ -11,7 +11,7 @@
 #include "gappedRepeats.cpp"
 #include <time.h>
 
-#define ANZAHL 50
+constexpr size_t kAnzahl = 50;
 
 using namespace std;
 using namespace sdsl;
@@ -20,28 +20,24 @@ int compare (const void * a, const void * b)
 {
   if ( *(double*)a <  *(double*)b ) return -1;
   if ( *(double*)a == *(double*)b ) return 0;
-  if ( *(double*)a >  *(double*)b ) return 1;
+//  if ( *(double*)a >  *(double*)b ) 
+  return 1;
 }
 
 
 double median( double arr[]){
     //cout << arr[0] << endl;
-    qsort (arr, ANZAHL, sizeof(double), compare);
+    qsort (arr, kAnzahl, sizeof(double), compare);
     //cout << arr[0] << endl;
-    return arr[ANZAHL/2];
+    return arr[kAnzahl/2];
 }
 
 
 int main(){
-    
-    //file lesen und in text speichern
-    string file = "a.txt";
-    file = "data/" + file;
-    ifstream inFile;
-    inFile.open(file);
-    stringstream strStream;
-    strStream << inFile.rdbuf();
-    string text = strStream.str();
+
+	const string text(1<<17, 'a');
+
+
     
     
     //Stringstats erstellen
@@ -50,15 +46,11 @@ int main(){
     //RMQ auf LCP-Array erstellen
     rmq_succinct_sada<> rmq(&stats.lcp);
     
-    int test = ANZAHL;                      //Anzahl der Tests aus denen Median bestimmt wird
     double timeLCPRMQ=0.0, timeLCP=0.0, timeNaiv=0.0, tstart;
-    double arrLCPRMQ[test], arrLCP[test], arrNaiv[test];
-    int k;
-    
-    
+    double arrLCPRMQ[kAnzahl], arrLCP[kAnzahl], arrNaiv[kAnzahl];
     
     //Dauer fuer LCPRMQ-Abfrage
-    for(k=0; k<test; k++){
+    for(size_t k=0; k<kAnzahl; k++){
         tstart = clock();
         lcpRmqMin(stats, rmq, 0, 10000);    
         arrLCPRMQ[k] = 0.0 + clock() -tstart;
@@ -72,7 +64,7 @@ int main(){
     while(timeNaiv < timeLCPRMQ){                 //nur eine von beiden Schleifen
     //while( x <= 2000){
         x++;
-        for(k=0; k<test; k++){
+        for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
             naivComp(text, 0, x);
             arrNaiv[k] = 0.0 + clock() - tstart;
@@ -91,7 +83,7 @@ int main(){
     size_t y = 0;
     while(timeLCP < timeLCPRMQ){
         y++;
-        for(k=0; k<test; k++){
+        for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
             lcpMin(stats, 0, y);
             arrLCP[k] = 0.0 + clock() -tstart;   
