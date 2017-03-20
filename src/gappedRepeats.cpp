@@ -182,6 +182,44 @@ int naivComp64b(const char* text, size_t i, size_t j, size_t textLength){
     return length;
 }
 
+//vergleicht die Laenge der Arme ueber Zeichenvergleiche
+//nutzt word packing mit __int64, "verbesserte" Variante
+//i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
+int naivComp128b(const char* text, size_t i, size_t j, size_t textLength){
+    bool gr = 1;
+    __int128* l;
+    __int128* r;
+    char* lbuff[16];
+    char* rbuff[16];
+    size_t k;
+    size_t length = 0;
+    
+    for (k=0; gr==1; k++){
+        if (i + 16*k <= j && j + 16*k <= textLength){
+            memcpy( lbuff, &text[i+16*k], 16);
+            memcpy( lbuff, &text[j+16*k], 16);
+            l = (__int128*) (lbuff);
+            r = (__int128*) (rbuff);
+            if (l[0]!=r[0]){
+                gr = 0;
+                length = k*16;
+                while ( text[i+length] == text[j+length] && i + length <= j && j + length <= textLength ){
+                    length++;
+                }
+            }
+        }
+        else {
+            gr = 0;
+            length = (k-1)*16;
+            while ( text[i+length+1] == text[j+length+1] && i + length+1 <= j && j + length+1 <= textLength){
+                length++;
+            }
+        }
+        
+    }
+    return length;
+}
+
 
 //vergleicht mit LCP-Array die Laenge der Arme
 //i und j sind Positionen im S/LCP-Array
