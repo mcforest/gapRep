@@ -32,67 +32,67 @@ int naivCompOld(const string &text, size_t i, size_t j, size_t length){
 }
 
 
-//vergleicht die Laenge der Arme ueber Zeichenvergleiche
+//vergleicht die Laenge der Arme ueber Zeichenvergleiche TODO Fehler: chars sind immer noch 8 bit lang, nicht 15
 //nutzt word packing mit __int 128
 //i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
-int naivComp128(const string &text, size_t i, size_t j){
-    bool gr = 1;
-    __int128 l;
-    __int128 r;
-    size_t k;
-    size_t length = 0;
-    
-    for (k=0; gr==1; k++){
-        if (i + 816*k <= j && j + 16*k <= text.size()){
-            l = text[i+16*k]<<(16*15) | text[i+16*k+1]<<(16*14)
-                                        | text[i+16*k+2]<<(16*13)
-                                        | text[i+16*k+3]<<(16*12)
-                                        | text[i+16*k+4]<<(16*11)
-                                        | text[i+16*k+5]<<(16*10)
-                                        | text[i+16*k+6]<<(16*9)
-                                        | text[i+16*k+7]<<(16*8)
-                                        | text[i+16*k+8]<<(16*7)
-                                        | text[i+16*k+9]<<(16*6)
-                                        | text[i+16*k+10]<<(16*5)
-                                        | text[i+16*k+11]<<(16*4)
-                                        | text[i+16*k+12]<<(16*3)
-                                        | text[i+16*k+13]<<(16*2)
-                                        | text[i+16*k+14]<<(16*1)
-                                        | text[i+16*k+15];
-            r = text[j+16*k]<<(16*15) | text[j+16*k+1]<<(16*14)
-                                        | text[j+16*k+2]<<(16*13)
-                                        | text[j+16*k+3]<<(16*12)
-                                        | text[j+16*k+4]<<(16*11)
-                                        | text[j+16*k+5]<<(16*10)
-                                        | text[j+16*k+6]<<(16*9)
-                                        | text[j+16*k+7]<<(16*8)
-                                        | text[j+16*k+8]<<(16*7)
-                                        | text[j+16*k+9]<<(16*6)
-                                        | text[j+16*k+10]<<(16*5)
-                                        | text[j+16*k+11]<<(16*4)
-                                        | text[j+16*k+12]<<(16*3)
-                                        | text[j+16*k+13]<<(16*2)
-                                        | text[j+16*k+14]<<(16*1)
-                                        | text[j+16*k+15];
-            if (l!=r){
-                gr = 0;
-                length = k*16;
-                while ( text[i+length] == text[j+length] && i + length <= j && j + length <= text.size() ){
-                    length++;
-                }
-            }
-        }
-        else {
-            gr = 0;
-            length = (k-1)*16;
-            while ( text[i+length+1] == text[j+length+1] && i + length+1 <= j && j + length+1 <= text.size()){
-                length++;
-            }
-        }
-        
-    }
-    return length;
-}
+// int naivComp128(const string &text, size_t i, size_t j){
+//     bool gr = 1;
+//     __int128 l;
+//     __int128 r;
+//     size_t k;
+//     size_t length = 0;
+//     
+//     for (k=0; gr==1; k++){
+//         if (i + 816*k <= j && j + 16*k <= text.size()){
+//             l = text[i+16*k]<<(16*15) | text[i+16*k+1]<<(16*14)
+//                                         | text[i+16*k+2]<<(16*13)
+//                                         | text[i+16*k+3]<<(16*12)
+//                                         | text[i+16*k+4]<<(16*11)
+//                                         | text[i+16*k+5]<<(16*10)
+//                                         | text[i+16*k+6]<<(16*9)
+//                                         | text[i+16*k+7]<<(16*8)
+//                                         | text[i+16*k+8]<<(16*7)
+//                                         | text[i+16*k+9]<<(16*6)
+//                                         | text[i+16*k+10]<<(16*5)
+//                                         | text[i+16*k+11]<<(16*4)
+//                                         | text[i+16*k+12]<<(16*3)
+//                                         | text[i+16*k+13]<<(16*2)
+//                                         | text[i+16*k+14]<<(16*1)
+//                                         | text[i+16*k+15];
+//             r = text[j+16*k]<<(16*15) | text[j+16*k+1]<<(16*14)
+//                                         | text[j+16*k+2]<<(16*13)
+//                                         | text[j+16*k+3]<<(16*12)
+//                                         | text[j+16*k+4]<<(16*11)
+//                                         | text[j+16*k+5]<<(16*10)
+//                                         | text[j+16*k+6]<<(16*9)
+//                                         | text[j+16*k+7]<<(16*8)
+//                                         | text[j+16*k+8]<<(16*7)
+//                                         | text[j+16*k+9]<<(16*6)
+//                                         | text[j+16*k+10]<<(16*5)
+//                                         | text[j+16*k+11]<<(16*4)
+//                                         | text[j+16*k+12]<<(16*3)
+//                                         | text[j+16*k+13]<<(16*2)
+//                                         | text[j+16*k+14]<<(16*1)
+//                                         | text[j+16*k+15];
+//             if (l!=r){
+//                 gr = 0;
+//                 length = k*16;
+//                 while ( text[i+length] == text[j+length] && i + length <= j && j + length <= text.size() ){
+//                     length++;
+//                 }
+//             }
+//         }
+//         else {
+//             gr = 0;
+//             length = (k-1)*16;
+//             while ( text[i+length+1] == text[j+length+1] && i + length+1 <= j && j + length+1 <= text.size()){
+//                 length++;
+//             }
+//         }
+//         
+//     }
+//     return length;
+// }
 
 
 
@@ -141,6 +141,47 @@ int naivComp(const string &text, size_t i, size_t j){
     }
     return length;
 }
+
+
+
+//vergleicht die Laenge der Arme ueber Zeichenvergleiche
+//nutzt word packing mit uint64_t, "verbesserte" Variante
+//i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
+int naivComp64b(const char* text, size_t i, size_t j, size_t textLength){
+    bool gr = 1;
+    uint64_t* l;
+    uint64_t* r;
+    char* lbuff[8];
+    char* rbuff[8];
+    size_t k;
+    size_t length = 0;
+    
+    for (k=0; gr==1; k++){
+        if (i + 8*k <= j && j + 8*k <= textLength){
+            memcpy( lbuff, &text[i+8*k], 8);
+            memcpy( lbuff, &text[j+8*k], 8);
+            l = (uint64_t*) (lbuff);
+            r = (uint64_t*) (rbuff);
+            if (l[0]!=r[0]){
+                gr = 0;
+                length = k*8;
+                while ( text[i+length] == text[j+length] && i + length <= j && j + length <= textLength ){
+                    length++;
+                }
+            }
+        }
+        else {
+            gr = 0;
+            length = (k-1)*8;
+            while ( text[i+length+1] == text[j+length+1] && i + length+1 <= j && j + length+1 <= textLength){
+                length++;
+            }
+        }
+        
+    }
+    return length;
+}
+
 
 //vergleicht mit LCP-Array die Laenge der Arme
 //i und j sind Positionen im S/LCP-Array

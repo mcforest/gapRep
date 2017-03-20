@@ -59,14 +59,17 @@ int main(){
     cout << "time lcprmq: " << timeLCPRMQ << endl;
     
     
+
     //Dauer fuer naiven Zeichenvergleich
     size_t x = 0;
+    const char* textchar = text.c_str();
+    size_t length = text.size();
     while(timeNaiv < timeLCPRMQ){                 //nur eine von beiden Schleifen
     //while( x <= 2000){
         x++;
         for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
-            naivComp(text, 0, x);
+            naivComp64b(textchar, 0, x, length);
             arrNaiv[k] = 0.0 + clock() - tstart;
         }
         timeNaiv = median(arrNaiv);
