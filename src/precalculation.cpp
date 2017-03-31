@@ -69,7 +69,7 @@ int main(){
         x++;
         for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
-            naivComp64b(textchar, 0, x, length);
+            naivComp(textchar, 0, x, length);
             arrNaiv[k] = 0.0 + clock() - tstart;
         }
         timeNaiv = median(arrNaiv);

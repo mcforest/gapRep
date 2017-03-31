@@ -99,7 +99,7 @@ int naivCompOld(const string &text, size_t i, size_t j, size_t length){
 //vergleicht die Laenge der Arme ueber Zeichenvergleiche
 //nutzt word packing mit uint64_t
 //i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
-int naivComp(const string &text, size_t i, size_t j){
+int naivComp64old(const string &text, size_t i, size_t j){
     bool gr = 1;
     uint64_t l;
     uint64_t r;
@@ -147,7 +147,7 @@ int naivComp(const string &text, size_t i, size_t j){
 //vergleicht die Laenge der Arme ueber Zeichenvergleiche
 //nutzt word packing mit uint64_t, "verbesserte" Variante
 //i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
-int naivComp64b(const char* text, size_t i, size_t j, size_t textLength){
+int naivComp(const char* text, size_t i, size_t j, size_t textLength){
     bool gr = 1;
     uint64_t* l;
     uint64_t* r;

@@ -61,6 +61,8 @@ int main(int argc, char *argv[]){
     size_t r;
     size_t realX;
     size_t realY;
+    const char* textchar = text.c_str();
+    size_t textlength = text.size();
     
     for(size_t i=0; i<= n-2; i++){
         for(size_t j=i+1; j <= n-1 && (text[stats.sa[i]] == text[stats.sa[j]]); j++){
@@ -71,7 +73,7 @@ int main(int argc, char *argv[]){
                     l = min(stats.sa[i], stats.sa[j]);
                     r = max(stats.sa[i], stats.sa[j]);
                     length = ceil((r-l)/alpha);
-                    length = naivComp(text, l, r);
+                    length = naivComp(textchar, l, r, textlength);
                     if (length >= ceil((r-l)/alpha)){
                         cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
                     }
