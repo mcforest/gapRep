@@ -237,3 +237,39 @@ int lcpRmqMin(const StringStats &stats, rmq_succinct_sada<> &rmq, size_t i, size
     
     return stats.lcp[rmq(i+1,j)];
 } 
+
+//LCE-Datenstruktur
+struct lceDataStructure {
+#ifdef NDEBUG
+		typedef checked_vector<int> vektor_type;
+#else
+		typedef std::vector<int> vektor_type;
+		//#define vektor_type sdsl::int_vector<>
+#endif
+
+	const std::string text;        //Text
+	const vektor_type sa;          //Suffix-Array
+	const vektor_type isa;         //inverted Suffix-Array
+	const vektor_type lcp;         //LCP-Array
+    rmq_succinct_sada<> rmq;        //RMQ-Datenstruktur auf Suffix-Array
+    const std::string mtext;        //Mirror-Image
+    const vektor_type msa;
+	const vektor_type misa;
+	const vektor_type mlcp;
+    rmq_succinct_sada<> mrmq;
+    
+    lceDataStructure(const std::string&& ttext) 
+		: text(ttext)
+		, sa(create_sa<vektor_type>(text, FLAGS_stripDollar))
+		, isa(inverse<vektor_type>(sa))
+		, lcp(create_lcp<vektor_type>(text, sa, isa))
+        , rmq(&lcp)
+        , mtext(string ( text.rbegin(), text.rend() ))
+        , msa(create_sa<vektor_type>(mtext, FLAGS_stripDollar))
+		, misa(inverse<vektor_type>(msa))
+		, mlcp(create_lcp<vektor_type>(mtext, msa, misa))
+        , mrmq(&mlcp)
+	{
+	}
+    
+};
