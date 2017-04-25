@@ -151,17 +151,19 @@ int naivComp(const char* text, size_t i, size_t j, size_t textLength){
     bool gr = 1;
     uint64_t* l;
     uint64_t* r;
-    char* lbuff[8];
-    char* rbuff[8];
+//     char* lbuff[8];
+//     char* rbuff[8];
     size_t k;
     size_t length = 0;
     
     for (k=0; gr==1; k++){
         if (i + 8*k <= j && j + 8*k <= textLength){
-            memcpy( lbuff, &text[i+8*k], 8);
-            memcpy( lbuff, &text[j+8*k], 8);
-            l = (uint64_t*) (lbuff);
-            r = (uint64_t*) (rbuff);
+//             memcpy( lbuff, &text[i+8*k], 8);
+//             memcpy( lbuff, &text[j+8*k], 8);
+//             l = (uint64_t*) (lbuff);
+//             r = (uint64_t*) (rbuff);
+            l = (uint64_t*) (text+(i+8*k));
+            r = (uint64_t*) (text+(j+8*k));
             if (l[0]!=r[0]){
                 gr = 0;
                 length = k*8;
