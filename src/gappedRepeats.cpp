@@ -15,6 +15,7 @@ using namespace std;
 using namespace sdsl;
 
 
+
 //vergleicht die Laenge der Arme ueber Zeichenvergleiche
 //nutzt word packing mit uint64_t, "verbesserte" Variante
 //i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
@@ -104,6 +105,48 @@ struct lceDataStructure {
 		, mlcp(create_lcp<vektor_type>(mtext, msa, misa))
         , mrmq(&mlcp)
 	{
+	}    
+};
+
+//Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
+//von alpha-gapped repeats mit einer Armlaenge von 1
+template<typename vektor_type>
+int* calcClusterStarts(const std::string text, const vektor_type sa){
+	int size = sa.size();
+	int *clusterStarts = new int[size];
+	clusterStarts[0]=0;
+	int pos = 1;
+	for(int i=1; i < size; i++){
+		if(text[sa[i-1]] != text[sa[i]]){
+			clusterStarts[pos]=i;
+			pos++;
+		}
 	}
+
+
+//	delete [] clusterStarts;
+	return clusterStarts;
+}
+
+
+//Cluster des Suffix-Arrays fuer die Berechnung von alpha-gapped repeats
+//mit einer Armlaenge von 1
+struct saClusters {
+#ifdef NDEBUG
+		typedef checked_vector<int> vektor_type;
+#else
+		typedef std::vector<int> vektor_type;
+		//#define vektor_type sdsl::int_vector<>
+#endif
+	
+	const std::string text;		//Text
+	const vektor_type sa;       //Suffix-Array des Texts
+	int* clusterStarts;      	//Array mit den Startpositionen der einzelnen Cluster
     
+    saClusters(const lceDataStructure lce) 
+		: text(lce.text)
+		, sa(lce.sa)
+		, clusterStarts(calcClusterStarts(text, sa))
+	{
+	}    
 };
