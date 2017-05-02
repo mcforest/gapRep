@@ -1,6 +1,4 @@
 cmake -H. -Bbuild
 cmake --build build -- -j3
-./build/src/precalc
-cmake --build build -- -j3
 ./build/src/gapRep2 2 beispiel.txt
 
