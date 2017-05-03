@@ -138,15 +138,13 @@ struct saClusters {
 		typedef std::vector<int> vektor_type;
 		//#define vektor_type sdsl::int_vector<>
 #endif
-	
-	const std::string text;		//Text
+
 	const vektor_type sa;       //Suffix-Array des Texts
 	int* clusterStarts;      	//Array mit den Startpositionen der einzelnen Cluster
     
     saClusters(const lceDataStructure lce) 
-		: text(lce.text)
-		, sa(lce.sa)
-		, clusterStarts(calcClusterStarts(text, sa))
+		: sa(lce.sa)
+		, clusterStarts(calcClusterStarts(lce.text, sa))
 	{
 	}    
 };
