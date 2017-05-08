@@ -113,9 +113,9 @@ struct lceDataStructure {
 //Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
 //von alpha-gapped repeats mit einer Armlaenge von 1
 template<typename vektor_type>
-size_t* calcClusterStarts(const std::string text, const vektor_type sa){
+vektor_type calcClusterStarts(const std::string text, const vektor_type sa){
 	int size = sa.size();
-	size_t *clusterStarts = new size_t[size];
+	vektor_type clusterStarts = new vektor_type(size);
 	clusterStarts[0]=0;
 	int pos = 1;
 	for(int i=1; i < size; i++){
@@ -130,37 +130,24 @@ size_t* calcClusterStarts(const std::string text, const vektor_type sa){
 	return clusterStarts;
 }
 
-
-//Cluster des Suffix-Arrays fuer die Berechnung von alpha-gapped repeats
-//mit einer Armlaenge von 1
-struct saClusters {
-#ifdef NDEBUG
-		typedef checked_vector<int> vektor_type;
-#else
-		typedef std::vector<int> vektor_type;
-		//#define vektor_type sdsl::int_vector<>
-#endif
-
-	const vektor_type sa;       //Suffix-Array des Texts(wird sortiert)
-	size_t* clusterStarts;      	//Array mit den Startpositionen der einzelnen Cluster
-    
-    saClusters(const lceDataStructure lce) 
-		: sa(lce.sa)
-		, clusterStarts(calcClusterStarts(lce.text, sa))
-	{
-	}    
-};
-
 //Funktion zur Berechnung alpha-gapped repeats mit Armen der Laenge 1
+template<typename vektor_type>
 int calc1Arm (lceDataStructure lce, size_t alpha){
-	saClusters *clusters = new saClusters(lce);
+	vektor_type clusterStarts = calcClusterStarts(lce.text, lce.sa);
+	size_t m = clusterStarts.size();
 	size_t n = lce.length;
-	size_t test;
-	//TODO sa clusterweise sortieren
+	vektor_type sa = lce.sa;
+
+	//innerhalb der Cluster des SA nach Startpositionen sortieren
+	for (size_t i = 0; i<m-1; i++){
+		sort(sa.begin()+clusterStarts[i], sa.begin()+clusterStarts[i+1]);
+	}
+
+	//Suche der alpha-gapped repeats mit Armlaenge 1
 	for (size_t i = 0; i<n-1; i++){
 		for (size_t j = i+1; j<=i+alpha && j<n; j++){
-			if (clusters->sa[i]+alpha >= clusters->sa[j] 
-				&& lce.text[clusters->sa[i]]==lce.text[clusters->sa[j]]){
+				if (sa[i]+alpha >= sa[j] 
+					&& lce.text[sa[i]]==lce.text[sa[j]]){
 				//gapRep gefunden
 			}
 			else{
