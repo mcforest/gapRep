@@ -15,26 +15,8 @@
 using namespace std;
 using namespace sdsl;
 
-int main(int argc, char *argv[]){
-    
-    if(argc != 3){
-		cout << "Bitte genau 2 Parameter fuer alpha und Text eingeben" << endl;
-        return 1;
-    }
-    
-    //file lesen und in text speichern
-    string file = argv[2];
-    file = "data/" + file;
-    ifstream inFile;
-    inFile.open(file);
-    stringstream strStream;
-    strStream << inFile.rdbuf();
-    string text = strStream.str();
-    
-    //Textausgabe als Test
-    //cout << text << endl;
-    
-    //Stringstats erstellen
+int mainCalc1 ( string text, float alpha ){
+//Stringstats erstellen
     const StringStats stats = StringStats(std::move(text));
     
     //Stringstatsausgabe als Test
@@ -49,12 +31,8 @@ int main(int argc, char *argv[]){
     //cout << "RMQ: " << stats.lcp[rmq(5,7)] << endl;
     
     //Initialisierungen
-    istringstream ss(argv[1]);
-    float alpha;
-    if (!(ss >> alpha)){
-        cerr << "Invalid number " << argv[2] << '\n';
-        return 1;
-    }
+    
+    
     size_t n = stats.sa.size();
     size_t length;
     size_t l;
@@ -100,8 +78,51 @@ int main(int argc, char *argv[]){
         }
     }
     
+	return 0;
+}
+
+int main(int argc, char *argv[]){
     
+    if(argc != 4){
+		cout << "Bitte genau 3 Parameter fuer alpha, Text und Variante eingeben" << endl;
+		cout << "Geben Sie z.B. ein: './build/src/gapRep2 2 beispiel.txt v1'" << endl;
+        return 1;
+    }
+    
+    //file lesen und in text speichern
+    string file = argv[2];
+    file = "data/" + file;
+    ifstream inFile;
+    inFile.open(file);
+    stringstream strStream;
+    strStream << inFile.rdbuf();
+    string text = strStream.str();
+
+	istringstream ss(argv[1]);
+	float alpha;
+    if (!(ss >> alpha)){
+        cerr << "Ungueltige Zahl " << argv[1] << '\n';
+        return 1;
+    }
+    
+    //Textausgabe als Test
+    //cout << text << endl;
+    
+	istringstream ss2(argv[3]);
+	string variante;
+    if (!(ss2 >> variante)){
+        cerr << "Ungueltiger String " << argv[3] << '\n';
+        return 1;
+    }
+	if ( variante == "v1" ){
+    	mainCalc1 ( text, alpha );
+    }
+	else {
+		cerr << "Ungueltige Variante " << argv[3] << '\n';
+	}
     
     return 0;
 }
+
+
 
