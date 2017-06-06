@@ -83,6 +83,48 @@ int mainCalc1 ( string text, float alpha ){
 
 int main(int argc, char *argv[]){
     
+	//Test werden nur zum Implementieren verwendet, werden nach Fertigstellung entfernt
+	if(argc == 2){
+		istringstream ss0(argv[1]);
+		string test;
+    	if (!(ss0 >> test)){
+        	cerr << "Ungueltiger String " << argv[1] << '\n';
+        	return 1;
+    	}
+		if(test == "test"){
+			cout << "Dies ist ein Test" << endl;
+
+			string file0 = "data/beispiel.txt";
+  	  		ifstream inFile0;
+  			inFile0.open(file0);
+    		stringstream strStream0;
+    		strStream0 << inFile0.rdbuf();
+    		const string text0 = strStream0.str();
+
+			cout << text0 << endl;
+			
+			lceDataStructure* lce = new lceDataStructure(text0);
+			
+			cout << "text: " << lce->text << endl;
+			cout << "length: " << lce->length << endl;
+			cout << "sa: " << lce->sa << endl;
+			cout << "isa: " << lce->isa << endl;
+			cout << "lcp: " << lce->lcp << endl;
+			cout << "mtext: " << lce->mtext << endl;
+			cout << "msa: " << lce->msa << endl;
+			cout << "misa: " << lce->misa << endl;
+			cout << "mlcp: " << lce->mlcp << endl;
+
+
+
+
+
+			return 0;
+		}
+	}
+	
+
+
     if(argc != 4){
 		cout << "Bitte genau 3 Parameter fuer alpha, Text und Variante eingeben" << endl;
 		cout << "Geben Sie z.B. ein: './build/src/gapRep2 2 beispiel.txt v1'" << endl;

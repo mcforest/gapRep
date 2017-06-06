@@ -14,7 +14,7 @@
 using namespace std;
 using namespace sdsl;
 
-
+const size_t constGamma = 5;
 
 //vergleicht die Laenge der Arme ueber Zeichenvergleiche
 //nutzt word packing mit uint64_t, "verbesserte" Variante
@@ -66,7 +66,7 @@ int lcpMin(const StringStats &stats, size_t i, size_t j){ //bei Uebergabe muss i
     return length;
 }
 
-//vergleich mit LCP-Array und RMQ die Laenge der Arme
+//vergleicht mit LCP-Array und RMQ die Laenge der Arme
 //i und j sind Positionen im S/LCP-Array
 int lcpRmqMin(const StringStats &stats, rmq_succinct_sada<> &rmq, size_t i, size_t j){
     
@@ -85,7 +85,7 @@ struct lceDataStructure {
 	const std::string text;        //Text
 	const size_t length;
 	const vektor_type sa;          //Suffix-Array
-	const vektor_type isa;         //inverted Suffix-Array
+	const vektor_type isa;         //inverted LCP-Array
 	const vektor_type lcp;         //LCP-Array
     rmq_succinct_sada<> rmq;        //RMQ-Datenstruktur auf Suffix-Array
     const std::string mtext;        //Mirror-Image
@@ -94,7 +94,7 @@ struct lceDataStructure {
 	const vektor_type mlcp;
     rmq_succinct_sada<> mrmq;
     
-    lceDataStructure(const std::string&& ttext) 
+    lceDataStructure(const std::string& ttext) 
 		: text(ttext)
 		, length(text.size())
 		, sa(create_sa<vektor_type>(text, FLAGS_stripDollar))
@@ -109,6 +109,23 @@ struct lceDataStructure {
 	{
 	}    
 };
+
+
+//alpha-gapped repeat als Tripel dargestellt
+struct alphaGappedRepeat {
+
+	const size_t lArm;		//Startposition linker Arm
+	const size_t rArm;		//Startposition rechter Arm
+	const size_t length;		//Armlaenge
+    
+    alphaGappedRepeat(size_t l, size_t r, size_t len) 
+		: lArm(l)
+		, rArm(r)
+		, length(len)
+	{
+	}    
+};
+
 
 //Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
 //von alpha-gapped repeats mit einer Armlaenge von 1
@@ -156,4 +173,156 @@ int calc1Arm (lceDataStructure lce, size_t alpha){
 		}
 	}
 	return 1;
+}
+
+//Funktion zur Berechnung alpha-gapped repeats mit kurzen Armen
+template<typename vektor_type>
+int calcShortArm (lceDataStructure lce, size_t alpha){
+	size_t n = lce.length;
+	size_t sbBegin;				//Anfangsposition von Superblock
+	size_t sbEnd;				//Endposition
+	vektor_type leftArms;
+	size_t raBegin;				//Anfangsposition des rechten Arms
+	size_t raEnd;				//Endposition
+	//TODO erstelle leere Liste von gapReps oder uebergebe oben einen Pointer auf eine Liste
+	
+	//TODO richtiger Logarithmus?
+	//fuer jeden Superblock
+	for (size_t m = constGamma * alpha; m <= n/log2(n) - constGamma -1; m++){
+		//TODO Verschiebung richtig?
+		//Superblock bestimmen
+		if( (m - constGamma * alpha) * log2(n) < 1 ){
+			sbBegin = 0;
+			sbEnd = (m + constGamma + 1) * log2(n) - 1;
+		}
+		else{
+			sbBegin = (m - constGamma * alpha) * log2(n);
+			sbEnd = (m + constGamma + 1) * log2(n) - 1;
+		}
+		
+		//TODO BasisfaktorBitvektor bestimmen (Lemma 22)
+		for ( size_t k = 0; k <= log2( constGamma * log2(n) ); k++){
+			//Armlaenge auf 2^k fixiert
+			
+			//gehe alle moeglichen rechten Arme durch
+			//TODO rechte Arme so richtig festgelegt?
+			for ( size_t j = 1; (j+1) * 2^k - 1 <= sbEnd ; j++ ){
+				raBegin = j * 2^k;
+				raEnd = (j+1) * 2^k - 1;
+				
+				//TODO leftArms = Lister der moeglichen linken Arme
+				for ( size_t i = 0; i < leftArms.size(); i++ ){
+					//TODO linken und rechten Arm erweitern
+					//TODO if gueltig: in Liste der gapped repeats einfuegen
+
+
+					size_t p = lcSuffix(lce, j*2^k -1, leftArms[i] -1); //TODO richtig um 1 verringert?
+
+					size_t s = lcPrefix(lce, (j+1)+2^k , leftArms[i] + 2^k );
+	
+					//TODO bestimme rl und rr mit Lemma 17
+	
+					//case a
+	
+					//case b
+	
+					//case c
+	
+					//case d
+	
+					//case e
+	
+					//case f
+	
+					//case g
+				}
+			}	
+		}
+	}
+
+	return 1;
+}
+
+//TODO
+//bekommt rechten Arm und suche moegliche linke Arme
+//erstellt dafuer Basisfaktor-Bitvektor
+//TODO BasisfaktorBitvektor muss uebergeben werden
+template<typename vektor_type>
+vektor_type findLeftArms (lceDataStructure lce, size_t sbBegin, size_t sbEnd, size_t raBegin, size_t raEnd){
+	//TODO Arme finden
+	return 0;
+}
+
+//Lemma 17:
+//Bekommt LCE-Datenstruktur, Startposition i eines Faktors und Periode p
+//gibt Laenge des laengsten Faktors aus
+size_t findLongestPeriod (lceDataStructure lce, size_t i, size_t p){
+	size_t length = lce.lcp[lce.rmq(i+1,i+p)];
+	return length;
+}
+
+//TODO um "schnellere" LCE-Anfragen erweitern
+// gibt longest common prefix von 2 Woertern aus, die an Position i und j beginnen
+int lcPrefix(lceDataStructure lce, size_t i, size_t j){    
+    return lce.lcp[ lce.rmq( lce.isa[i]+1, lce.isa[j] ) ];
+} 
+
+//TODO um "schnellere" LCE-Anfragen erweitern
+// gibt longest common suffix von 2 Woertern aus, die an Position i und j beginnen
+int lcSuffix(lceDataStructure lce, size_t i, size_t j){  
+	size_t n = lce.length;  
+    return lce.mlcp[ lce.mrmq( lce.misa[n-i-1]+1, lce.misa[n-j-1] ) ];
+} 
+
+//TODO wird nicht verwendet sondern in calcShortArm direkt ausgefuehrt
+//Funktion erweitert gapped repeat maximal nach links und rechts
+//bekommt LCE-Datenstruktur, Start- und Endposition des Superblocks, 
+//		  k (Armlaenge 2^k), j, "Startpositionen" beider y-Arme
+/*
+alphaGappedRepeat* extendArms (lceDataStructure lce, size_t sbBegin, size_t sbEnd, 
+								size_t k, size_t j, size_t raBegin, size_t laBegin) {
+	alphaGappedRepeat* rep = 0; //new alphaGappedRepeat(0,0,0);
+
+	size_t p = lcSuffix(lce, j*2^k -1, laBegin -1); //TODO richtig um 1 verringert?
+
+	size_t s = lcPrefix(lce, (j+1)+2^k , laBegin + 2^k );
+	
+	//TODO bestimme rl und rr mit Lemma 17
+	
+	//case a
+	
+	//case b
+	
+	//case c
+	
+	//case d
+	
+	//case e
+	
+	//case f
+	
+	//case g
+		
+	return rep;
+}
+*/
+
+//Funktion zur Berechnung alpha-gapped repeats mit kurzen Armen
+template<typename vektor_type>
+int calcLongArm (lceDataStructure lce, size_t alpha){
+	size_t n = lce.length;
+	vektor_type wB = 0; //TODO bestimme Block-Representation
+	//TODO lceB = lce-Datenstruktur der Blockrep
+	for ( size_t k = 0; k <= (n/log2(n)); k++){
+		vektor_type kBlocks = 0; //TODO kBloecke Bestimmen
+		for ( size_t i = 0; i < kBlocks.length; i++){
+			for ( size_t start = 0; start < log2(n); start++ ){
+				//TODO linken Arm y fixieren
+				//TODO rechte Arme mit Binaersuche finden
+				//TODO alle rechten Arme pruefen und erweitern
+			}
+		}
+	}
+	
+	return 0;
 }
