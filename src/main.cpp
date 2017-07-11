@@ -81,6 +81,16 @@ int mainCalc1 ( string text, float alpha ){
 	return 0;
 }
 
+int mainCalc2 ( string text, float alpha ){
+	lceDataStructure* lce = new lceDataStructure(text);
+	vector<alphaGappedRepeat> grList;
+	//calc1Arm (lce, alpha, grList);
+	//calcShortArm (lce, alpha, grList);
+	//calcLongArm (lce, alpha, grList);
+	return 0;
+}
+
+
 int main(int argc, char *argv[]){
     
 	//Test werden nur zum Implementieren verwendet, werden nach Fertigstellung entfernt
@@ -102,6 +112,8 @@ int main(int argc, char *argv[]){
     		const string text0 = strStream0.str();
 
 			cout << text0 << endl;
+
+			string text1 = "gabbdefabbx";
 			
 			lceDataStructure* lce = new lceDataStructure(text0);
 			
@@ -110,16 +122,42 @@ int main(int argc, char *argv[]){
 			cout << "sa: " << lce->sa << endl;
 			cout << "isa: " << lce->isa << endl;
 			cout << "lcp: " << lce->lcp << endl;
-			cout << "mtext: " << lce->mtext << endl;
-			cout << "msa: " << lce->msa << endl;
-			cout << "misa: " << lce->misa << endl;
-			cout << "mlcp: " << lce->mlcp << endl;
+			cout << "length (text+mtext): " << lce->text.size() << endl;
+			cout << lce->text[10] << lce->text[13] << lce->text[14] << endl;
+			//cout << "mtext: " << lce->mtext << endl;
+			//cout << "msa: " << lce->msa << endl;
+			//cout << "misa: " << lce->misa << endl;
+			//cout << "mlcp: " << lce->mlcp << endl;
+			
 
+			/*
+			vector<int> vec (4);
+			cout << vec.capacity() << endl;
+			vec.reserve(28);
+			cout << vec.capacity() << endl;
+			vec[0] = 1;
+			vec.push_back (5);
+			cout << vec << endl;
+			cout << vec.size() << endl;
+			vec.push_back (5);
+			cout << vec << endl;
+			cout << vec.size() << endl;
+			*/
+			/*
+			alphaGappedRepeat* agr1 = new alphaGappedRepeat(5,29,3);
+			alphaGappedRepeat* agr2 = new alphaGappedRepeat(7,10,2);
+			alphaGappedRepeat* agr3 = new alphaGappedRepeat(12,25,9);
+			alphaGappedRepeat* agr4 = new alphaGappedRepeat(15,22,5);
+			vector<alphaGappedRepeat*> vec;
+			vec.push_back(agr1);
+			vec.push_back(agr2);
+			vec.push_back(agr3);
+			vec.push_back(agr4);
+			printGappedRepeat(vec);
+			*/
 
+			
 
-
-
-			return 0;
 		}
 	}
 	
