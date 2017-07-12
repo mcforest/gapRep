@@ -12,6 +12,7 @@
 #include "../build/src/grenzwerte.hpp"
 
 
+
 using namespace std;
 using namespace sdsl;
 
@@ -81,10 +82,13 @@ int mainCalc1 ( string text, float alpha ){
 	return 0;
 }
 
+
 int mainCalc2 ( string text, float alpha ){
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat> grList;
-	//calc1Arm (lce, alpha, grList);
+	float test = 2.0;
+	calc2Arm(lce, test, &grList);
+	//calc1Arm (lce, test, grList);
 	//calcShortArm (lce, alpha, grList);
 	//calcLongArm (lce, alpha, grList);
 	return 0;

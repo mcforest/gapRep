@@ -154,12 +154,12 @@ vektor_type calcClusterStarts(const std::string text, const vektor_type sa){
 
 //Funktion zur Berechnung alpha-gapped repeats mit Armen der Laenge 1
 template<typename vektor_type>
-int calc1Arm (lceDataStructure lce, size_t alpha, vector<alphaGappedRepeat> &grList){
-	vektor_type clusterStarts = calcClusterStarts(lce.text, lce.sa);
+int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grList){
+	vektor_type clusterStarts = calcClusterStarts(lce->text, lce->sa);
 	size_t m = clusterStarts.size();
-	size_t n = lce.length;
-	vektor_type sa = lce.sa;
-	alphaGappedRepeat gappedRep;
+	size_t n = lce->length;
+	vektor_type sa = lce->sa;
+	alphaGappedRepeat* gappedRep;
 
 	//innerhalb der Cluster des SA nach Startpositionen sortieren
 	for (size_t i = 0; i<m-1; i++){
@@ -170,17 +170,23 @@ int calc1Arm (lceDataStructure lce, size_t alpha, vector<alphaGappedRepeat> &grL
 	for (size_t i = 0; i<n-1; i++){
 		for (size_t j = i+1; j<=i+alpha && j<n; j++){
 				if (sa[i]+alpha >= sa[j] 
-					&& lce.text[sa[i]]==lce.text[sa[j]]){
+					&& lce->text[sa[i]]==lce->text[sa[j]]){
 				//gapRep gefunden
 				gappedRep = new alphaGappedRepeat(sa[i], sa[j] , 1);
-				grList.push_back(gappedRep);
+				//TODO push back wieder benutzen
+				//grList->push_back(gappedRep);
 			}
 			else{
 				j = i + alpha + 1;
 			}
 		}
 	}
-	return 1;
+	return 0;
+}
+
+template<typename vektor_type>
+int calc2Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grList){
+	return 0;
 }
 
 //Lemma 17:
@@ -491,21 +497,23 @@ int calcLongArm (lceDataStructure lce, float alpha, vector<alphaGappedRepeat> &g
 	alphaGappedRepeat gappedRep;
 	vektor_type rightArms;
 	for ( size_t k = 0; k <= (n/log2(n)); k++){
+		//TODO keine eigene Funktion noetigc
 		vektor_type kBlocks = calcKBlocks(&lce, k);
 		for ( size_t i = 0; i < kBlocks.length; i++){
 			for ( size_t start = 0; start < log2(n); start++ ){
 				// linken Arm y fixieren
+				//TODO kBlock hier falsch definiert
 				yStart = kBlocks[i] + start;
 				yLength = (2^(k-1)) * log2(n);
-				//TODO rechte Arme mit Binaersuche finden
+				//TODO nur einen rechten Arm mit binary search suchen
 				rightArms = binarySearch(lce, lceBlock, yStart, yLength);
 				for ( size_t j = 0; j < rightArms.size(); j++ ){
-					//TODO Arme erweitern
 					prefix = lcPrefix(lce, yStart, rightArms[j]);
 					suffix = lcSuffix(lce, yStart, rightArms[j]);
 					//TODO muessen Positionen noch um 1 verringert werden? Laenge richtig?
 					gappedRep = new alphaGappedRepeat(yStart-prefix, rightArms[j]-prefix, prefix+suffix);
 					//auf Gueltigkeit pruefen
+					//TODO auf alpha pruefen und ob der rechte Arm im richtigen kBlock z beginnt
 					if ( gappedRep.lArm + gappedRep.length < gappedRep.rArm && 2^(k+1) <= gappedRep.length < 2^(k+2)){
 						grList.push_back(gappedRep);
 					}
