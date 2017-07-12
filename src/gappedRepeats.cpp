@@ -133,10 +133,10 @@ struct alphaGappedRepeat {
 
 //Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
 //von alpha-gapped repeats mit einer Armlaenge von 1
-template<typename vektor_type>
-vektor_type calcClusterStarts(const std::string text, const vektor_type sa){
+//template<typename vektor_type>
+vector<int> calcClusterStarts(const std::string text, const vector<int> sa){
 	int size = sa.size();
-	vektor_type clusterStarts;
+	vector<int> clusterStarts;
 	clusterStarts.reserve(size);
 	clusterStarts.push_back(0);
 	int pos = 1;
@@ -153,12 +153,12 @@ vektor_type calcClusterStarts(const std::string text, const vektor_type sa){
 }
 
 //Funktion zur Berechnung alpha-gapped repeats mit Armen der Laenge 1
-template<typename vektor_type>
+//template<typename vektor_type>
 int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grList){
-	vektor_type clusterStarts = calcClusterStarts(lce->text, lce->sa);
+	vector<int> clusterStarts = calcClusterStarts(lce->text, lce->sa);
 	size_t m = clusterStarts.size();
 	size_t n = lce->length;
-	vektor_type sa = lce->sa;
+	vector<int> sa = lce->sa;
 	alphaGappedRepeat* gappedRep;
 
 	//innerhalb der Cluster des SA nach Startpositionen sortieren
@@ -184,7 +184,7 @@ int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grL
 	return 0;
 }
 
-template<typename vektor_type>
+//template<typename vektor_type>
 int calc2Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grList){
 	return 0;
 }
