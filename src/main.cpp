@@ -89,7 +89,8 @@ int mainCalc2 ( string text, float alpha ){
 	float test = 2.0;
 	calc1Arm(lce, test, &grList);
 	calcShortArm (lce, alpha, &grList);
-	calcLongArm (lce, alpha, &grList);
+	//calcLongArm (lce, alpha, &grList);
+	printGappedRepeat(grList);
 	return 0;
 }
 
@@ -199,6 +200,9 @@ int main(int argc, char *argv[]){
     }
 	if ( variante == "v1" ){
     	mainCalc1 ( text, alpha );
+    }
+	else if ( variante == "v2" ){
+    	mainCalc2 ( text, alpha );
     }
 	else {
 		cerr << "Ungueltige Variante " << argv[3] << '\n';

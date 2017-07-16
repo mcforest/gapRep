@@ -293,26 +293,26 @@ int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*
 			
 			//gehe alle moeglichen rechten Arme durch
 			//TODO rechte Arme so richtig festgelegt?
-			for ( size_t j = 1; (j+1) * 2^k - 1 <= sbEnd ; j++ ){
-				raBegin = j * 2^k;
-				raEnd = (j+1) * 2^k - 1;
+			for ( size_t j = 1; (j+1) * pow(2,k) - 1 <= sbEnd ; j++ ){
+				raBegin = j * pow(2,k);
+				raEnd = (j+1) * pow(2,k) - 1;
 				
 				//TODO leftArms = Lister der moeglichen linken Arme
-				leftArms = kmpMatching(lce, sbBegin, sbEnd, raBegin, 2^k);
+				leftArms = kmpMatching(lce, sbBegin, sbEnd, raBegin, pow(2,k));
 				//leftArms = kmpMatching();
 				for ( size_t i = 0; i < leftArms.size(); i++ ){
 
-					a = lcSuffix(lce, j*2^k -1, (leftArms[i] -1) ); //TODO richtig um 1 verringert?
+					a = lcSuffix(lce, j*pow(2,k) -1, (leftArms[i] -1) ); //TODO richtig um 1 verringert?
 
-					s = lcPrefix(lce, (j+1)+2^k , (leftArms[i] + 2^k) );
+					s = lcPrefix(lce, (j+1)+pow(2,k) , (leftArms[i] + pow(2,k)) );
 
 					
 					//TODO muessen Positionen noch um 1 verringert werden? Laenge richtig?
-					gappedRep = new alphaGappedRepeat(leftArms[i]-a, raBegin-a, a+s+2^k);
+					gappedRep = new alphaGappedRepeat(leftArms[i]-a, raBegin-a, a+s+pow(2,k));
 
 					//auf negative Luecke pruefen und s. "To avoid duplicates (S.15)"
 					//wenn gueltig: einfuegen
-					if( gappedRep->lArm < gappedRep->rArm && j*2^k+sbBegin <= gappedRep->rArm+2^k ){
+					if( gappedRep->lArm < gappedRep->rArm && j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) ){
 						grList->push_back(gappedRep);
 					}
 					//TODO Fallunterscheidung fuer periodischen Fall
@@ -387,7 +387,7 @@ vector<int> calcBlockRep (lceDataStructure*& lce){
 
 	//Bestimme Blockrepraesentation
 	for(size_t i = 0; i <= size/log2(size)+1; i++){
-		//blockRep-push_back( clusters[lce->isa[i*log2(size)]] );
+		blockRep.push_back( clusters[lce->isa[i*log2(size)]] );
 		//xxxxxxxxxx//blockRep.push_back(lce.isa[i*log2(size)]);
 	}
 	return blockRep;
@@ -401,7 +401,7 @@ vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 	double lgn = log2((double)size);
 
 	vector<int> blockRep;
-	blockRep.reserve(size/ ( (2^k) * log2(size)) +1 );
+	blockRep.reserve(size/ ( (pow(2,k)) * log2(size)) +1 );
 
 	vector<int> clusters(size);
 	clusters[0]=0;
@@ -417,8 +417,8 @@ vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 	}
 
 	//Bestimme Blockrepraesentation
-	for(size_t i = 0; i <= size/ ( (2^k) * log2(size)) +1; i++){
-		//blockRep-push_back( clusters[lce->isa[i*(2^k)*log2(size)]] );
+	for(size_t i = 0; i <= size/ ( (pow(2,k)) * log2(size)) +1; i++){
+		blockRep.push_back( clusters[lce->isa[i*(2^k)*log2(size)]] );
 		//xxxxxxxxxxxxxxx//blockRep.push_back(lce.isa[i*log2(size)]);
 	}
 	return blockRep;
@@ -443,18 +443,20 @@ int printGappedRepeat(vector<alphaGappedRepeat*>& vec){
 //binaere Suche, durchlaeuft das Suffix-Array von der Blockrep w'
 //sucht nach vorkommen von y in w'
 //template<typename vektor_type>
-vector<int> binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, size_t yStart, size_t yLength){
+int binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, size_t yStart, size_t yLength){
 	vector<int> arms;
 	size_t left = 0;
 	size_t right = lceBlock->length; //TODO richtig runden?
 	size_t mid;
 	size_t neighbour;
-	double lgn = log2((double)lce->length);
+	double lgn = log2((double)lce->length); //TODO runden?
 	while (left <= right){
 		mid = left + (( right - left) / 2);
 		if ( lcPrefix(lce,yStart,lce->text[mid*lgn]) >= yLength){
 			//Wert in Liste der Arme einfuegen
-			arms.push_back(mid*lgn);
+			return mid*lgn;
+			//arms.push_back(mid*lgn);
+			/*
 			//Nachbarn untersuchen
 			neighbour = mid - 1;
 			while (lcPrefix(lce,yStart,lce->text[neighbour*lgn]) >= yLength && neighbour >= 0){
@@ -466,6 +468,7 @@ vector<int> binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, si
 				arms.push_back(neighbour*lgn);
 				neighbour++;
 			}
+			*/
 			
 		}
 		else {
@@ -478,7 +481,7 @@ vector<int> binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, si
 			
 		}
 	}
-	return arms;
+	return -1;
 }
 
 
@@ -495,6 +498,7 @@ int calcLongArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*>
 
 	size_t yStart;
 	size_t yLength;
+	size_t y2; //Startposition von y'
 	size_t suffix;
 	size_t prefix;
 	alphaGappedRepeat* gappedRep;
@@ -508,20 +512,23 @@ int calcLongArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*>
 				// linken Arm y fixieren
 				//TODO kBlock hier falsch definiert
 				yStart = kBlocks[i] + start;
-				yLength = (2^(k-1)) * log2(n);
-				//TODO nur einen rechten Arm mit binary search suchen
-				rightArms = binarySearch(lce, lceBlock, yStart, yLength);
-				for ( size_t j = 0; j < rightArms.size(); j++ ){
-					prefix = lcPrefix(lce, yStart, rightArms[j]);
-					suffix = lcSuffix(lce, yStart, rightArms[j]);
-					//TODO muessen Positionen noch um 1 verringert werden? Laenge richtig?
-					gappedRep = new alphaGappedRepeat(yStart-prefix, rightArms[j]-prefix, prefix+suffix);
-					//auf Gueltigkeit pruefen
-					//TODO auf alpha pruefen und ob der rechte Arm im richtigen kBlock z beginnt
-					if ( gappedRep->lArm + gappedRep->length < gappedRep->rArm && 2^(k+1) <= gappedRep->length < 2^(k+2)){
-						grList->push_back(gappedRep);
+				yLength = (pow(2,(k-1))) * log2(n);
+				
+				y2 = binarySearch(lce, lceBlock, yStart, yLength);
+				if (y2 != -1){
+					rightArms = kmpMatching (lceBlock, 0, lceBlock->length, y2, yLength);
+					for ( size_t j = 0; j < rightArms.size(); j++ ){
+						prefix = lcPrefix(lce, yStart, rightArms[j]);
+						suffix = lcSuffix(lce, yStart, rightArms[j]);
+						//TODO muessen Positionen noch um 1 verringert werden? Laenge richtig?
+						gappedRep = new alphaGappedRepeat(yStart-prefix, rightArms[j]-prefix, prefix+suffix);
+						//auf Gueltigkeit pruefen
+						//TODO auf alpha pruefen und ob der rechte Arm im richtigen kBlock z beginnt
+						if ( gappedRep->lArm + gappedRep->length < gappedRep->rArm && pow(2,(k+1)) <= gappedRep->length < pow(2,(k+2))){
+							grList->push_back(gappedRep);
 					}
 					//TODO if ( 2^(k+1) <= yLength < 2^(k+2) ){hinzufuegen}
+					}
 				}
 			}
 		}
