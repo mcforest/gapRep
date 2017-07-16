@@ -154,7 +154,7 @@ vector<int> calcClusterStarts(const std::string text, const vector<int> sa){
 
 //Funktion zur Berechnung alpha-gapped repeats mit Armen der Laenge 1
 //template<typename vektor_type>
-int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grList){
+int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *grList){
 	vector<int> clusterStarts = calcClusterStarts(lce->text, lce->sa);
 	size_t m = clusterStarts.size();
 	size_t n = lce->length;
@@ -174,7 +174,7 @@ int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grL
 				//gapRep gefunden
 				gappedRep = new alphaGappedRepeat(sa[i], sa[j] , 1);
 				//TODO push back wieder benutzen
-				//grList->push_back(gappedRep);
+				grList->push_back(gappedRep);
 			}
 			else{
 				j = i + alpha + 1;
@@ -184,10 +184,6 @@ int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grL
 	return 0;
 }
 
-//template<typename vektor_type>
-int calc2Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grList){
-	return 0;
-}
 
 //Lemma 17:
 //Bekommt LCE-Datenstruktur, Startposition i eines Faktors und Periode p
@@ -264,7 +260,7 @@ int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){
 //Funktion zur Berechnung alpha-gapped repeats mit kurzen Armen
 //schnellere Berechnung fuer Perioden bisher nicht enthalten
 //template<typename vektor_type>
-int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grList){
+int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *grList){
 	size_t n = lce->length;
 	size_t sbBegin;				//Anfangsposition von Superblock
 	size_t sbEnd;				//Endposition
@@ -317,7 +313,7 @@ int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat>
 					//auf negative Luecke pruefen und s. "To avoid duplicates (S.15)"
 					//wenn gueltig: einfuegen
 					if( gappedRep->lArm < gappedRep->rArm && j*2^k+sbBegin <= gappedRep->rArm+2^k ){
-						//grList.push_back(gappedRep);
+						grList->push_back(gappedRep);
 					}
 					//TODO Fallunterscheidung fuer periodischen Fall
 
@@ -489,7 +485,7 @@ vector<int> binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, si
 
 //Funktion zur Berechnung alpha-gapped repeats mit kurzen Armen
 template<typename lceDataStructure>
-int calcLongArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> *grList){
+int calcLongArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *grList){
 	size_t n = lce->length;
 	vector<int> blockRep = calcBlockRep(lce);
 	stringstream ss;
@@ -523,7 +519,7 @@ int calcLongArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat> 
 					//auf Gueltigkeit pruefen
 					//TODO auf alpha pruefen und ob der rechte Arm im richtigen kBlock z beginnt
 					if ( gappedRep->lArm + gappedRep->length < gappedRep->rArm && 2^(k+1) <= gappedRep->length < 2^(k+2)){
-						//grList.push_back(gappedRep);
+						grList->push_back(gappedRep);
 					}
 					//TODO if ( 2^(k+1) <= yLength < 2^(k+2) ){hinzufuegen}
 				}
