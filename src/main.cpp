@@ -89,8 +89,8 @@ int mainCalc2 ( string text, float alpha ){
 	float test = 2.0;
 	calc1Arm(lce, test, &grList);
 	//calc1Arm (lce, test, grList);
-	//calcShortArm (lce, alpha, &grList);
-	//calcLongArm (lce, alpha, &grList);
+	calcShortArm (lce, alpha, &grList);
+	calcLongArm (lce, alpha, &grList);
 	return 0;
 }
 
