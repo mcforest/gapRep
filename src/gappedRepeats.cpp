@@ -8,6 +8,7 @@
 #include "checked_vector.hpp"
 #include <sdsl/rmq_support.hpp>
 #include <boost/utility/string_ref.hpp>
+#include "../build/src/grenzwerte.hpp"
 
 
 
@@ -85,6 +86,7 @@ struct lceDataStructure {
 #endif
 
 	const std::string text;        //Text
+	const char* ctext;
 	const size_t length;
 	const vektor_type sa;          //Suffix-Array
 	const vektor_type isa;         //inverted LCP-Array
@@ -100,6 +102,7 @@ struct lceDataStructure {
     
     lceDataStructure(const std::string& ttext) 
 		: text(ttext + '\0' + string ( ttext.rbegin(), ttext.rend() ))
+		, ctext(text.c_str())
 		, length(ttext.size())
 		, sa(create_sa<vektor_type>(text, FLAGS_stripDollar))
 		, isa(inverse<vektor_type>(sa))
@@ -145,6 +148,62 @@ int printGappedRepeat(vector<alphaGappedRepeat*>& vec){
 	return 0;
 }
 
+//TODO um "schnellere" LCE-Anfragen erweitern
+// gibt longest common prefix von 2 Woertern aus, die an Position i und j beginnen
+int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){
+	//return lce->lcp[ lce->rmq( lce->isa[i]+1, lce->isa[j] ) ];	//Einzeiler "langsame Abfrage"
+	size_t realX = j-i;
+	size_t realY = abs(lce->isa[i] - lce->isa[j]);
+	
+	if( realX < x && (realX * y) < (realY * x) ){         //wenig zeichenvergleiche noetig	
+		//durchlaeuft Text
+		return naivComp(lce->ctext,i,j,lce->length); 
+	}
+	else if( realY < y){                         //kurzer Abstand im Suffix-Array
+		//durchlaeuft LCP-Array
+		size_t left = lce->isa[i];
+		size_t right = lce->isa[j];
+		int length = abs(j-i);
+    	for(size_t k = left+1; k<=right; k++){
+        	length = min(length, lce->lcp[k]);
+    	}
+		return length;
+	}
+	else{
+		//benutzt RMQ
+    	return lce->lcp[ lce->rmq( lce->isa[i]+1, lce->isa[j] ) ];
+	}
+} 
+
+
+//TODO um "schnellere" LCE-Anfragen erweitern
+// gibt longest common suffix von 2 Woertern aus, die an Position i und j beginnen
+int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){  
+	size_t n = lce->length;  
+//    return lce->lcp[ lce->rmq( lce->isa[i+n+1]+1, lce->isa[j+n+1] ) ];  //ohne "schnellen" abfragen
+//} 
+	size_t realX = j-i;
+	size_t realY = abs(lce->isa[i+n] - lce->isa[j+n]);
+	
+	if( realX < x && (realX * y) < (realY * x) ){         //wenig zeichenvergleiche noetig	
+		//durchlaeuft Text
+		return naivComp(lce->ctext,i+n,j+n,lce->length); 
+	}
+	else if( realY < y){                         //kurzer Abstand im Suffix-Array
+		//durchlaeuft LCP-Array
+		size_t left = lce->isa[i+n];
+		size_t right = lce->isa[j+n];
+		int length = abs(j-i);
+    	for(size_t k = left+1; k<=right; k++){
+        	length = min(length, lce->lcp[k]);
+    	}
+		return length;
+	}
+	else{
+		//benutzt RMQ
+    	return lce->lcp[ lce->rmq( lce->isa[i+n]+1, lce->isa[j+n] ) ];
+	}
+} 
 
 //Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
 //von alpha-gapped repeats mit einer Armlaenge von 1
@@ -236,7 +295,7 @@ vektor_type findLeftArms (lceDataStructure lce, size_t sbBegin, size_t sbEnd, si
 
 vector<int> kmpMatching (lceDataStructure*& lce, size_t sbStart, size_t sbEnd, size_t raStart, size_t raLen){
 	
-	const char* text = lce->text.c_str();//TODO funktioniert das?
+	const char* text = lce->ctext;
 	string rArm = (string)(text+raStart);
     vector<int> lcs(raLen + 1, -1);
 	vector<int> lArms;
@@ -272,19 +331,7 @@ vector<int> kmpMatching (lceDataStructure lce, size_t sbStart, size_t sbEnd, siz
 */
 
 
-//TODO um "schnellere" LCE-Anfragen erweitern
-// gibt longest common prefix von 2 Woertern aus, die an Position i und j beginnen
-int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){    
-    return lce->lcp[ lce->rmq( lce->isa[i]+1, lce->isa[j] ) ];
-} 
 
-
-//TODO um "schnellere" LCE-Anfragen erweitern
-// gibt longest common suffix von 2 Woertern aus, die an Position i und j beginnen
-int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){  
-	size_t n = lce->length;  
-    return lce->lcp[ lce->rmq( lce->isa[i+n+1]+1, lce->isa[j+n+1] ) ];
-} 
 
 //Funktion zur Berechnung alpha-gapped repeats mit kurzen Armen
 //schnellere Berechnung fuer Perioden bisher nicht enthalten

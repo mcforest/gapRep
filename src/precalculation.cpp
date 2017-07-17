@@ -61,15 +61,15 @@ int main(){
     
 
     //Dauer fuer naiven Zeichenvergleich
-    size_t x = 0;
+    size_t x1 = 0;
     const char* textchar = text.c_str();
     size_t length = text.size();
     while(timeNaiv < timeLCPRMQ){                 //nur eine von beiden Schleifen
     //while( x <= 2000){
-        x++;
+        x1++;
         for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
-            naivComp(textchar, 0, x, length);
+            naivComp(textchar, 0, x1, length);
             arrNaiv[k] = 0.0 + clock() - tstart;
         }
         timeNaiv = median(arrNaiv);
@@ -78,23 +78,23 @@ int main(){
 //         }
     }
     cout << "time naiv: " << timeNaiv << endl;
-    cout << "x: " << x << endl;
+    cout << "x: " << x1 << endl;
     
     
     
     //Dauer fuer iterative Minimumsuche im LCP-Array
-    size_t y = 0;
+    size_t y1 = 0;
     while(timeLCP < timeLCPRMQ){
-        y++;
+        y1++;
         for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
-            lcpMin(stats, 0, y);
+            lcpMin(stats, 0, y1);
             arrLCP[k] = 0.0 + clock() -tstart;   
         }
         timeLCP = median(arrLCP);
     }
     cout << "time lcp: " << timeLCP << endl;
-    cout << "y: " << y << endl;
+    cout << "y: " << y1 << endl;
     
 
     
@@ -102,7 +102,7 @@ int main(){
     //in Datei schreiben
     ofstream fileout;
     fileout.open("grenzwerte.hpp"); 
-    fileout << "constexpr size_t x = " << x << ";\nconstexpr size_t y = " << y << ";"; 
+    fileout << "constexpr size_t x = " << x1 << ";\nconstexpr size_t y = " << y << ";"; 
     fileout.close();
     
 }
