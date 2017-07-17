@@ -16,7 +16,7 @@ using namespace std;
 using namespace sdsl;
 
 
-const size_t constGamma = 5;
+const size_t constGamma = 2;
 
 //vergleicht die Laenge der Arme ueber Zeichenvergleiche
 //nutzt word packing mit uint64_t, "verbesserte" Variante
@@ -130,6 +130,21 @@ struct alphaGappedRepeat {
 	}    
 };
 
+//Gibt eine alphaGappedRepeat in der Konsole aus
+int printGappedRepeat(alphaGappedRepeat *gr){
+	cout << "(" << gr->lArm << "," << gr->rArm << "," << gr->length << ")" << endl;
+	return 0;
+}
+
+//Gibt ein Array aller alphaGappedRepeats in der Konsole aus
+template<typename alphaGappedRepeat>
+int printGappedRepeat(vector<alphaGappedRepeat*>& vec){
+	for(size_t i = 0; i<vec.size(); i++){
+		printGappedRepeat(vec[i]);
+	}
+	return 0;
+}
+
 
 //Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
 //von alpha-gapped repeats mit einer Armlaenge von 1
@@ -157,7 +172,8 @@ vector<int> calcClusterStarts(const std::string text, const vector<int> sa){
 int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *grList){
 	vector<int> clusterStarts = calcClusterStarts(lce->text, lce->sa);
 	size_t m = clusterStarts.size();
-	size_t n = lce->length;
+	//size_t n = lce->length;
+	size_t n = lce->text.size();
 	vector<int> sa = lce->sa;
 	alphaGappedRepeat* gappedRep;
 
@@ -168,17 +184,30 @@ int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *gr
 
 	//Suche der alpha-gapped repeats mit Armlaenge 1
 	for (size_t i = 0; i<n-1; i++){
-		for (size_t j = i+1; j<=i+alpha && j<n; j++){
-				if (sa[i]+alpha >= sa[j] 
-					&& lce->text[sa[i]]==lce->text[sa[j]]){
-				//gapRep gefunden
-				gappedRep = new alphaGappedRepeat(sa[i], sa[j] , 1);
-				//TODO push back wieder benutzen
-				grList->push_back(gappedRep);
-			}
-			else{
-				j = i + alpha + 1;
-			}
+		//alpha*2, da unser suffix array groeßer ist als angenommen 
+		//(da der text einmal vorw und einmal rueckw gespeichert ist
+		for (size_t j = i+1; j<=i+alpha*2 && j<n; j++){				
+				//cout << "l: " << sa[i] << " r: " << sa[j] << endl;
+				if (lce->text[sa[i]]==lce->text[sa[j]]){
+					//cout << "i: " << i << " j: " << j << endl;
+					//cout << "hi" << endl;
+					//gapRep gefunden
+					if ( (i==0 || lce->text[sa[i]-1]!=lce->text[sa[j]-1]) &&
+						 (j==n-1 || lce->text[sa[i]+1]!=lce->text[sa[j]+1])){
+						gappedRep = new alphaGappedRepeat(sa[i], sa[j] , 1);
+						if (gappedRep->lArm <= lce->length && gappedRep->rArm <= lce->length){
+							if (gappedRep->lArm+(alpha*gappedRep->length) >= gappedRep->rArm ){
+								grList->push_back(gappedRep);
+							}
+						}
+					}
+				}
+				
+				//sobald cluster verlassen wird nicht weiter pruefen
+				else{
+					j = i + alpha*2 + 1;
+				}
+				
 		}
 	}
 	return 0;
@@ -400,8 +429,8 @@ vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 	size_t size = lce->length;
 	double lgn = log2((double)size);
 
-	vector<int> blockRep;
-	blockRep.reserve(size/ ( (pow(2,k)) * log2(size)) +1 );
+	//vector<int> blockRep;
+	//blockRep.reserve(size/ ( (pow(2,k)) * log2(size)) +1 );
 
 	vector<int> clusters(size);
 	clusters[0]=0;
@@ -416,28 +445,18 @@ vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 		}
 	}
 
+	/* folgendes ueberfluessig, es werden nur startpositionen benoetigt
 	//Bestimme Blockrepraesentation
 	for(size_t i = 0; i <= size/ ( (pow(2,k)) * log2(size)) +1; i++){
 		blockRep.push_back( clusters[lce->isa[i*(2^k)*log2(size)]] );
 		//xxxxxxxxxxxxxxx//blockRep.push_back(lce.isa[i*log2(size)]);
 	}
 	return blockRep;
+	*/
+	return clusters;
 }
 
-//Gibt eine alphaGappedRepeat in der Konsole aus
-int printGappedRepeat(alphaGappedRepeat gr){
-	cout << "(" << gr.lArm << "," << gr.rArm << "," << gr.length << ")" << endl;
-	return 0;
-}
 
-//Gibt ein Array aller alphaGappedRepeats in der Konsole aus
-template<typename alphaGappedRepeat>
-int printGappedRepeat(vector<alphaGappedRepeat*>& vec){
-	for(size_t i = 0; i<vec.size(); i++){
-		printGappedRepeat(*vec[i]);
-	}
-	return 0;
-}
 
 
 //binaere Suche, durchlaeuft das Suffix-Array von der Blockrep w'
@@ -448,7 +467,7 @@ int binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, size_t ySt
 	size_t left = 0;
 	size_t right = lceBlock->length; //TODO richtig runden?
 	size_t mid;
-	size_t neighbour;
+	//size_t neighbour;
 	double lgn = log2((double)lce->length); //TODO runden?
 	while (left <= right){
 		mid = left + (( right - left) / 2);
@@ -505,17 +524,16 @@ int calcLongArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*>
 	vector<int> rightArms;
 	vector<int> kBlocks;
 	for ( size_t k = 0; k <= (n/log2(n)); k++){
-		//TODO keine eigene Funktion noetigc
 		kBlocks = calcKBlock(lce, k);
 		for ( size_t i = 0; i < kBlocks.size(); i++){
 			for ( size_t start = 0; start < log2(n); start++ ){
 				// linken Arm y fixieren
-				//TODO kBlock hier falsch definiert
 				yStart = kBlocks[i] + start;
 				yLength = (pow(2,(k-1))) * log2(n);
 				
 				y2 = binarySearch(lce, lceBlock, yStart, yLength);
 				if (y2 != -1){
+					//TODO yLenght korrigieren, es ist nicht die eigentliche laenge gefragt, sondern die in der blockrep
 					rightArms = kmpMatching (lceBlock, 0, lceBlock->length, y2, yLength);
 					for ( size_t j = 0; j < rightArms.size(); j++ ){
 						prefix = lcPrefix(lce, yStart, rightArms[j]);

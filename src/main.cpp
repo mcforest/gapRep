@@ -87,9 +87,10 @@ int mainCalc2 ( string text, float alpha ){
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat*> grList;
 	float test = 2.0;
-	calc1Arm(lce, test, &grList);
-	calcShortArm (lce, alpha, &grList);
+	calc1Arm(lce, alpha, &grList);
+	//calcShortArm (lce, alpha, &grList);
 	//calcLongArm (lce, alpha, &grList);
+	cout << "alpha-gapped repeats:" << endl;
 	printGappedRepeat(grList);
 	return 0;
 }
