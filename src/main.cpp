@@ -87,8 +87,8 @@ int mainCalc2 ( string text, float alpha ){
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat*> grList;
 	float test = 2.0;
-	calc1Arm(lce, alpha, &grList);
-	//calcShortArm (lce, alpha, &grList);
+	//calc1Arm(lce, alpha, &grList);
+	calcShortArm (lce, alpha, &grList);
 	//calcLongArm (lce, alpha, &grList);
 	cout << "alpha-gapped repeats:" << endl;
 	printGappedRepeat(grList);
@@ -119,9 +119,21 @@ int main(int argc, char *argv[]){
 			cout << text0 << endl;
 
 			string text1 = "gabbdefabbx";
+			string text2 = "aaaaaaaaaa";
+			string text3 = "abac";
 			
-			lceDataStructure* lce = new lceDataStructure(text0);
+			lceDataStructure* lce = new lceDataStructure(text3);
+			size_t lceabfrage;
+
+			cout << "length: " << lce->length << endl;
+			cout << "text: " << lce->text << endl;
+			cout << "sa:  " << lce->sa << endl;
+			cout << "isa: " << lce->isa << endl;
+			cout << "lcp: " << lce->lcp << endl;
+			lceabfrage = lcSuffix (lce, 0, 6);
+			cout << "lceabfrage: " << lceabfrage << endl;
 			
+			/*
 			cout << "text: " << lce->text << endl;
 			cout << "length: " << lce->length << endl;
 			cout << "sa: " << lce->sa << endl;
@@ -129,6 +141,7 @@ int main(int argc, char *argv[]){
 			cout << "lcp: " << lce->lcp << endl;
 			cout << "length (text+mtext): " << lce->text.size() << endl;
 			cout << lce->text[10] << lce->text[13] << lce->text[14] << endl;
+			*/
 			//cout << "mtext: " << lce->mtext << endl;
 			//cout << "msa: " << lce->msa << endl;
 			//cout << "misa: " << lce->misa << endl;

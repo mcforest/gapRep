@@ -2,3 +2,6 @@ cmake -H. -Bbuild
 cmake --build build -- -j3
 ./build/src/gapRep2 2 beispiel.txt v1
 
+eigene Tests starten mit ./build/src/gapRep2 test
+
+

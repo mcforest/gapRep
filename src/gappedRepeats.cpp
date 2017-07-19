@@ -74,7 +74,16 @@ int lcpMin(const StringStats &stats, size_t i, size_t j){ //bei Uebergabe muss i
 int lcpRmqMin(const StringStats &stats, rmq_succinct_sada<> &rmq, size_t i, size_t j){
     
     return stats.lcp[rmq(i+1,j)];
-} 
+}
+
+string invertieren (string text){
+	string invert;
+	for (int i = text.size()-1 ; i >= 0 ; i--){
+		invert = invert + text[i];
+	}
+	cout << invert << endl;
+	return invert;
+}
 
 //LCE-Datenstruktur
 struct lceDataStructure {
@@ -101,7 +110,8 @@ struct lceDataStructure {
     //rmq_succinct_sada<> mrmq;
     
     lceDataStructure(const std::string& ttext) 
-		: text(ttext + '\0' + string ( ttext.rbegin(), ttext.rend() ))
+		//: text(ttext + '\0' + string ( ttext.rbegin(), ttext.rend() ))
+		: text(ttext + '\0' + invertieren(ttext) )
 		, ctext(text.c_str())
 		, length(ttext.size())
 		, sa(create_sa<vektor_type>(text, FLAGS_stripDollar))
@@ -149,9 +159,10 @@ int printGappedRepeat(vector<alphaGappedRepeat*>& vec){
 }
 
 //TODO um "schnellere" LCE-Anfragen erweitern
-// gibt longest common prefix von 2 Woertern aus, die an Position i und j beginnen
-int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){
-	//return lce->lcp[ lce->rmq( lce->isa[i]+1, lce->isa[j] ) ];	//Einzeiler "langsame Abfrage"
+// gibt longest common suffix von 2 Woertern aus, die an Position i und j beginnen
+int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){
+	return lce->lcp[ lce->rmq( lce->isa[i]+1, lce->isa[j] ) ];	//Einzeiler "langsame Abfrage"
+/*
 	size_t realX = j-i;
 	size_t realY = abs(lce->isa[i] - lce->isa[j]);
 	
@@ -173,15 +184,22 @@ int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){
 		//benutzt RMQ
     	return lce->lcp[ lce->rmq( lce->isa[i]+1, lce->isa[j] ) ];
 	}
+*/
 } 
 
 
 //TODO um "schnellere" LCE-Anfragen erweitern
-// gibt longest common suffix von 2 Woertern aus, die an Position i und j beginnen
-int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){  
-	size_t n = lce->length;  
-//    return lce->lcp[ lce->rmq( lce->isa[i+n+1]+1, lce->isa[j+n+1] ) ];  //ohne "schnellen" abfragen
-//} 
+// gibt longest common prefix von 2 Woertern aus, die an Position i und j beginnen
+int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){  
+	cout << "hallo" << endl;
+	size_t n = lce->length;
+	cout << j << " " << i << endl;
+	cout << 2*n-j << " " << 2*n-i << endl;
+	cout << lce->sa.size() << endl;
+	cout << lce->isa[2*n-i] << " " << lce->isa[2*n-j] << endl;
+	return lce->lcp[ lce->rmq( lce->isa[2*n-j]+1, lce->isa[2*n-i] ) ];
+    //return lce->lcp[ lce->rmq( lce->isa[i+n+1]+1, lce->isa[j+n+1] ) ];  //ohne "schnellen" abfragen 
+/*
 	size_t realX = j-i;
 	size_t realY = abs(lce->isa[i+n] - lce->isa[j+n]);
 	
@@ -203,6 +221,7 @@ int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){
 		//benutzt RMQ
     	return lce->lcp[ lce->rmq( lce->isa[i+n]+1, lce->isa[j+n] ) ];
 	}
+*/
 } 
 
 //Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
@@ -317,7 +336,6 @@ vector<int> kmpMatching (lceDataStructure*& lce, size_t sbStart, size_t sbEnd, s
 		textPos++;
 		if(armPos == raLen) lArms.push_back(textPos - raLen);
 	}
-	
 	return lArms;
 }
 
@@ -347,11 +365,11 @@ int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*
 	int a;						//Suffix des Arms
 	int s;						//Prefix des Arms
 
-	//TODO naechste zeile entfernen
-	//vector<int> testvar = kmpMatching(lce, sbBegin, sbEnd, raBegin, 0);
+
 	
 	//fuer jeden Superblock
 	for (size_t m = constGamma * alpha; m <= n/log2(n) - constGamma -1; m++){
+		//cout << "hi" << endl;
 		//TODO Verschiebung richtig?
 		//Superblock bestimmen
 		if( (m - constGamma * alpha) * log2(n) < 1 ){
@@ -373,18 +391,26 @@ int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*
 				raBegin = j * pow(2,k);
 				raEnd = (j+1) * pow(2,k) - 1;
 				
-				//TODO leftArms = Lister der moeglichen linken Arme
+				//leftArms = Lister der moeglichen linken Arme
 				leftArms = kmpMatching(lce, sbBegin, sbEnd, raBegin, pow(2,k));
 				//leftArms = kmpMatching();
 				for ( size_t i = 0; i < leftArms.size(); i++ ){
 
-					a = lcSuffix(lce, j*pow(2,k) -1, (leftArms[i] -1) ); //TODO richtig um 1 verringert?
+					//a = lcSuffix(lce, j*pow(2,k) -1, (leftArms[i] -1) ); //TODO richtig um 1 verringert?
 
-					s = lcPrefix(lce, (j+1)+pow(2,k) , (leftArms[i] + pow(2,k)) );
+					//s = lcPrefix(lce, (j+1)+pow(2,k) , (leftArms[i] + pow(2,k)) );
+					
+					cout << (j+1)+pow(2,k) << " " << (leftArms[i] + pow(2,k)) << endl;
+					//a = lcPrefix(lce, j*pow(2,k) -1, (leftArms[i] -1) );
+					a = lcPrefix(lce , (leftArms[i] -1), j*pow(2,k) -1 );
+					cout << "2" << endl;
+					s = lcSuffix(lce, (j+1)+pow(2,k) , (leftArms[i] + pow(2,k)) );
 
 					
 					//TODO muessen Positionen noch um 1 verringert werden? Laenge richtig?
 					gappedRep = new alphaGappedRepeat(leftArms[i]-a, raBegin-a, a+s+pow(2,k));
+					cout << "leftArm: " << leftArms[i] << " rightArm: " << raBegin << " a: " << a << endl;
+					//printGappedRepeat(gappedRep);
 
 					//auf negative Luecke pruefen und s. "To avoid duplicates (S.15)"
 					//wenn gueltig: einfuegen
@@ -472,6 +498,7 @@ vector<int> calcBlockRep (lceDataStructure*& lce){
 
 //Berechnet k-Bloecke auf w fuer fixes k
 //template<typename vektor_type>
+//TODO k benutzen
 vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 	size_t size = lce->length;
 	double lgn = log2((double)size);
