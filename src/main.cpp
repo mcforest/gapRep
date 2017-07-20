@@ -86,7 +86,6 @@ int mainCalc1 ( string text, float alpha ){
 int mainCalc2 ( string text, float alpha ){
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat*> grList;
-	float test = 2.0;
 	//calc1Arm(lce, alpha, &grList);
 	calcShortArm (lce, alpha, &grList);
 	//calcLongArm (lce, alpha, &grList);
@@ -130,7 +129,7 @@ int main(int argc, char *argv[]){
 			cout << "sa:  " << lce->sa << endl;
 			cout << "isa: " << lce->isa << endl;
 			cout << "lcp: " << lce->lcp << endl;
-			lceabfrage = lcSuffix (lce, 0, 6);
+			lceabfrage = lcSuffix (lce, 0, 2);
 			cout << "lceabfrage: " << lceabfrage << endl;
 			
 			/*

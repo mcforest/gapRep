@@ -159,9 +159,12 @@ int printGappedRepeat(vector<alphaGappedRepeat*>& vec){
 }
 
 //TODO um "schnellere" LCE-Anfragen erweitern
-// gibt longest common suffix von 2 Woertern aus, die an Position i und j beginnen
-int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){
-	return lce->lcp[ lce->rmq( lce->isa[i]+1, lce->isa[j] ) ];	//Einzeiler "langsame Abfrage"
+// gibt longest common prefix von 2 Woertern aus, die an Position i und j beginnen
+int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){
+	size_t left = min(lce->isa[i],lce->isa[j]);
+	size_t right = max(lce->isa[i],lce->isa[j]);
+	cout << left << " " << right << endl;
+	return lce->lcp[ lce->rmq( left+1, right ) ];	//Einzeiler "langsame Abfrage"
 /*
 	size_t realX = j-i;
 	size_t realY = abs(lce->isa[i] - lce->isa[j]);
@@ -189,15 +192,12 @@ int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){
 
 
 //TODO um "schnellere" LCE-Anfragen erweitern
-// gibt longest common prefix von 2 Woertern aus, die an Position i und j beginnen
-int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){  
-	cout << "hallo" << endl;
+// gibt longest common suffix von 2 Woertern aus, die an Position i und j beginnen
+int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){  
 	size_t n = lce->length;
-	cout << j << " " << i << endl;
-	cout << 2*n-j << " " << 2*n-i << endl;
-	cout << lce->sa.size() << endl;
-	cout << lce->isa[2*n-i] << " " << lce->isa[2*n-j] << endl;
-	return lce->lcp[ lce->rmq( lce->isa[2*n-j]+1, lce->isa[2*n-i] ) ];
+	size_t left = min( lce->isa[2*n-i], lce->isa[2*n-j] );
+	size_t right = max( lce->isa[2*n-i], lce->isa[2*n-j] );
+	return lce->lcp[ lce->rmq( left+1, right ) ];
     //return lce->lcp[ lce->rmq( lce->isa[i+n+1]+1, lce->isa[j+n+1] ) ];  //ohne "schnellen" abfragen 
 /*
 	size_t realX = j-i;
@@ -369,7 +369,6 @@ int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*
 	
 	//fuer jeden Superblock
 	for (size_t m = constGamma * alpha; m <= n/log2(n) - constGamma -1; m++){
-		//cout << "hi" << endl;
 		//TODO Verschiebung richtig?
 		//Superblock bestimmen
 		if( (m - constGamma * alpha) * log2(n) < 1 ){
@@ -400,10 +399,11 @@ int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*
 
 					//s = lcPrefix(lce, (j+1)+pow(2,k) , (leftArms[i] + pow(2,k)) );
 					
+					//TODO Werte hier sind falsch
 					cout << (j+1)+pow(2,k) << " " << (leftArms[i] + pow(2,k)) << endl;
 					//a = lcPrefix(lce, j*pow(2,k) -1, (leftArms[i] -1) );
 					a = lcPrefix(lce , (leftArms[i] -1), j*pow(2,k) -1 );
-					cout << "2" << endl;
+					cout << "gggg" << endl;
 					s = lcSuffix(lce, (j+1)+pow(2,k) , (leftArms[i] + pow(2,k)) );
 
 					
