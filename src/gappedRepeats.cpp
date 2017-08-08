@@ -23,7 +23,7 @@ const size_t constGamma = 2;
 //nutzt word packing mit uint64_t, "verbesserte" Variante
 //i und j sind Positionen im Text, length ist bereits die geforderte Mindestlaenge
 int naivComp(const char* text, size_t i, size_t j, size_t textLength){
-    bool gr = 1;
+    bool gr = 1;		//Abbruchbedingung der Schleife (wenn linkes Teilwort das rechte schneidet oder ungleich ist)
     uint64_t* l;
     uint64_t* r;
 //     char* lbuff[8];
@@ -31,8 +31,10 @@ int naivComp(const char* text, size_t i, size_t j, size_t textLength){
     size_t k;
     size_t length = 0;
     
+	
     for (k=0; gr==1; k++){
-        if (i + 8*k <= j && j + 8*k <= textLength){
+        if (i + 8*(k+1) < j && j + 8*(k+1) < textLength){
+
 //             memcpy( lbuff, &text[i+8*k], 8);
 //             memcpy( lbuff, &text[j+8*k], 8);
 //             l = (uint64_t*) (lbuff);
@@ -43,14 +45,15 @@ int naivComp(const char* text, size_t i, size_t j, size_t textLength){
                 gr = 0;
                 length = k*8;
                 while ( text[i+length] == text[j+length] && i + length <= j && j + length <= textLength ){
+					
                     length++;
                 }
             }
         }
         else {
             gr = 0;
-            length = (k-1)*8;
-            while ( text[i+length+1] == text[j+length+1] && i + length+1 <= j && j + length+1 <= textLength){
+            length = k*8;
+            while ( text[i+length] == text[j+length] && i + length < j && j + length < textLength){
                 length++;
             }
         }
@@ -72,8 +75,8 @@ int lcpMin(const StringStats &stats, size_t i, size_t j){ //bei Uebergabe muss i
 //vergleicht mit LCP-Array und RMQ die Laenge der Arme
 //i und j sind Positionen im S/LCP-Array
 int lcpRmqMin(const StringStats &stats, rmq_succinct_sada<> &rmq, size_t i, size_t j){
-    
-    return stats.lcp[rmq(i+1,j)];
+    int length = abs(stats.sa[j] - stats.sa[i]);
+    return min(length, stats.lcp[rmq(i+1,j)]);
 }
 
 string invertieren (string text){
@@ -81,7 +84,6 @@ string invertieren (string text){
 	for (int i = text.size()-1 ; i >= 0 ; i--){
 		invert = invert + text[i];
 	}
-	cout << invert << endl;
 	return invert;
 }
 
@@ -138,10 +140,15 @@ struct alphaGappedRepeat {
     alphaGappedRepeat(size_t l, size_t r, size_t len) 
 		: lArm(l)
 		, rArm(r)
+		//, length(min(len,r-l)) //TODO pruefen
 		, length(len)
 	{
 	}    
 };
+
+bool isValid(alphaGappedRepeat *gr, size_t alpha){
+	return ( gr->lArm + alpha * gr->length >= gr->rArm && gr->lArm + gr->length <= gr->rArm && gr->length > 0 );
+}
 
 //Gibt eine alphaGappedRepeat in der Konsole aus
 int printGappedRepeat(alphaGappedRepeat *gr){
@@ -163,9 +170,12 @@ int printGappedRepeat(vector<alphaGappedRepeat*>& vec){
 int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){
 	size_t left = min(lce->isa[i],lce->isa[j]);
 	size_t right = max(lce->isa[i],lce->isa[j]);
-	cout << left << " " << right << endl;
+	if (left == right){
+		return 0;
+	}
+	//cout << left << " " << right << endl;
 	return lce->lcp[ lce->rmq( left+1, right ) ];	//Einzeiler "langsame Abfrage"
-/*
+/*TODO i und j durch left und right ersetzen
 	size_t realX = j-i;
 	size_t realY = abs(lce->isa[i] - lce->isa[j]);
 	
@@ -192,14 +202,17 @@ int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){
 
 
 //TODO um "schnellere" LCE-Anfragen erweitern
-// gibt longest common suffix von 2 Woertern aus, die an Position i und j beginnen
+// gibt longest common suffix von 2 Woertern aus, die an Position i und j enden
 int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){  
 	size_t n = lce->length;
 	size_t left = min( lce->isa[2*n-i], lce->isa[2*n-j] );
 	size_t right = max( lce->isa[2*n-i], lce->isa[2*n-j] );
+	if (left == right){
+		return 0;
+	}
 	return lce->lcp[ lce->rmq( left+1, right ) ];
     //return lce->lcp[ lce->rmq( lce->isa[i+n+1]+1, lce->isa[j+n+1] ) ];  //ohne "schnellen" abfragen 
-/*
+/*TODO i und j durch left und right ersetzen
 	size_t realX = j-i;
 	size_t realY = abs(lce->isa[i+n] - lce->isa[j+n]);
 	
@@ -224,6 +237,19 @@ int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){
 */
 } 
 
+//TODO um "schnellere" LCE-Anfragen erweitern
+// gibt longest common suffix von i an welcher prefix von j ist
+// prefix endet an i, suffix beginnt an j
+int lcSuffixPrefix(lceDataStructure*& lce, size_t i, size_t j){
+	size_t n = lce->length;
+	size_t left = min( lce->isa[2*n-i], lce->isa[j] );
+	size_t right = max( lce->isa[2*n-i], lce->isa[j] );
+	if (left == right){
+		return 0;
+	}
+	return lce->lcp[ lce->rmq( left+1, right ) ];
+}
+
 //Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
 //von alpha-gapped repeats mit einer Armlaenge von 1
 //template<typename vektor_type>
@@ -247,7 +273,7 @@ vector<int> calcClusterStarts(const std::string text, const vector<int> sa){
 
 //Funktion zur Berechnung alpha-gapped repeats mit Armen der Laenge 1
 //template<typename vektor_type>
-int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *grList){
+int calc1Arm(lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*> *grList){
 	vector<int> clusterStarts = calcClusterStarts(lce->text, lce->sa);
 	size_t m = clusterStarts.size();
 	//size_t n = lce->length;
@@ -264,17 +290,21 @@ int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *gr
 	for (size_t i = 0; i<n-1; i++){
 		//alpha*2, da unser suffix array groeßer ist als angenommen 
 		//(da der text einmal vorw und einmal rueckw gespeichert ist
-		for (size_t j = i+1; j<=i+alpha*2 && j<n; j++){				
-				//cout << "l: " << sa[i] << " r: " << sa[j] << endl;
+		for (size_t j = i+1; j<=i+alpha*2 && j<n; j++){
 				if (lce->text[sa[i]]==lce->text[sa[j]]){
-					//cout << "i: " << i << " j: " << j << endl;
-					//cout << "hi" << endl;
 					//gapRep gefunden
+					//TODO gapped repeats am anfgang/ende eines runs werden vergessen
+					/*
 					if ( (i==0 || lce->text[sa[i]-1]!=lce->text[sa[j]-1]) &&
-						 (j==n-1 || lce->text[sa[i]+1]!=lce->text[sa[j]+1])){
+						 (j==n-1 || lce->text[sa[i]+1]!=lce->text[sa[j]+1])){ */
+					if ( ( i==0 && lce->text[sa[i]+1]!=lce->text[sa[j]+1] )
+						|| ( j==n-1 && lce->text[sa[i]-1]!=lce->text[sa[j]-1] )
+						|| i+1 == j
+						|| ( lce->text[sa[i]-1]!=lce->text[sa[j]-1] && lce->text[sa[i]+1]!=lce->text[sa[j]+1] ) ) {
 						gappedRep = new alphaGappedRepeat(sa[i], sa[j] , 1);
 						if (gappedRep->lArm <= lce->length && gappedRep->rArm <= lce->length){
-							if (gappedRep->lArm+(alpha*gappedRep->length) >= gappedRep->rArm ){
+							//if (gappedRep->lArm+(alpha*gappedRep->length) >= gappedRep->rArm ){ //durch isValid() ersetzt
+							if (isValid(gappedRep, alpha)){
 								grList->push_back(gappedRep);
 							}
 						}
@@ -291,23 +321,13 @@ int calc1Arm(lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *gr
 	return 0;
 }
 
-
+//TODO bearbeiten
 //Lemma 17:
 //Bekommt LCE-Datenstruktur, Startposition i eines Faktors und Periode p
 //gibt Laenge des laengsten Faktors aus
-size_t findLongestPeriod (lceDataStructure lce, size_t i, size_t p){
-	size_t length = lce.lcp[lce.rmq(i+1,i+p)];
-	return length;
-}
-
-//TODO
-//bekommt rechten Arm und suche moegliche linke Arme
-//erstellt dafuer Basisfaktor-Bitvektor
-//TODO BasisfaktorBitvektor muss uebergeben werden
-template<typename vektor_type>
-vektor_type findLeftArms (lceDataStructure lce, size_t sbBegin, size_t sbEnd, size_t raBegin, size_t raEnd){
-	//TODO Arme finden
-	return 0;
+size_t findLongestPeriod (lceDataStructure*& lce, size_t i, size_t p){
+	size_t length = lcPrefix(lce, i, i+p);
+	return length+p;
 }
 
 
@@ -329,7 +349,7 @@ vector<int> kmpMatching (lceDataStructure*& lce, size_t sbStart, size_t sbEnd, s
 
 	int textPos = sbStart;
 	int armPos = 0;
-	while(textPos < sbEnd)
+	while(textPos < sbEnd+1 && textPos < raStart+raLen)
 	{
 		while(armPos != -1 && (armPos == raLen || rArm[armPos] != text[textPos])) armPos = lcs[armPos];
 		armPos++;
@@ -341,37 +361,45 @@ vector<int> kmpMatching (lceDataStructure*& lce, size_t sbStart, size_t sbEnd, s
 
 
 
-/*
-vector<int> kmpMatching (lceDataStructure lce, size_t sbStart, size_t sbEnd, size_t raStart, size_t raLen){
-	vector<int> x;
-	return x;
-}
-*/
-
-
-
 
 //Funktion zur Berechnung alpha-gapped repeats mit kurzen Armen
 //schnellere Berechnung fuer Perioden bisher nicht enthalten
 //template<typename vektor_type>
-int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *grList){
+int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*> *grList){
+	alphaGappedRepeat* gappedRep;
 	size_t n = lce->length;
 	size_t sbBegin;				//Anfangsposition von Superblock
 	size_t sbEnd;				//Endposition
-	vector<int> leftArms;
+
+	vector<int> leftArms;		//Liste der moeglichen linken Arme
 	size_t raBegin;				//Anfangsposition des rechten Arms
 	size_t raEnd;				//Endposition
-	alphaGappedRepeat* gappedRep;
-	int a;						//Suffix des Arms
-	int s;						//Prefix des Arms
-
-
+	size_t laBegin;
 	
+	int a;						//Suffix des Arms (Laenge)
+	int s;						//Prefix des Arms (Laenge)
+
+	size_t p;					//Periode
+	size_t rLLength;			//r_lambda laenge (startet an laBegin)
+	size_t rRLength;			//r_rho laenge (startet an raBegin)
+	size_t helpLength;
+	bool stillValid;			//fuer Fall c und e
+	bool oneblock = false;		//falls Text nur einen Superblock enthält
+	
+
+	if ( constGamma*alpha <= n/log2(n) - constGamma -1 ){
+		oneblock = true;
+	}
+
 	//fuer jeden Superblock
-	for (size_t m = constGamma * alpha; m <= n/log2(n) - constGamma -1; m++){
-		//TODO Verschiebung richtig?
+	for (size_t m = constGamma * alpha; m <= n/log2(n) - constGamma -1 || oneblock ; m++){
 		//Superblock bestimmen
-		if( (m - constGamma * alpha) * log2(n) < 1 ){
+		if (oneblock){ //falls Text nur einen Superblock enthält
+			sbBegin = 0;
+			sbEnd = n-1;
+			oneblock = false; //damit Schleife ueber m nur einmal durchlaufen wird
+		}
+		else if( (m - constGamma * alpha) * log2(n) < 1 ){
 			sbBegin = 0;
 			sbEnd = (m + constGamma + 1) * log2(n) - 1;
 		}
@@ -379,46 +407,170 @@ int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*
 			sbBegin = (m - constGamma * alpha) * log2(n);
 			sbEnd = (m + constGamma + 1) * log2(n) - 1;
 		}
-		
 		//TODO BasisfaktorBitvektor bestimmen (Lemma 22)
 		for ( size_t k = 0; k <= log2( constGamma * log2(n) ); k++){
 			//Armlaenge auf 2^k fixiert
 			
 			//gehe alle moeglichen rechten Arme durch
-			//TODO rechte Arme so richtig festgelegt?
 			for ( size_t j = 1; (j+1) * pow(2,k) - 1 <= sbEnd ; j++ ){
-				raBegin = j * pow(2,k);
-				raEnd = (j+1) * pow(2,k) - 1;
+				raBegin = sbBegin + j * pow(2,k);
+				raEnd = sbBegin + (j+1) * pow(2,k) - 1;
 				
-				//leftArms = Lister der moeglichen linken Arme
+				//TODO linke Arme rechts von raBegin sind ueberfluessig
 				leftArms = kmpMatching(lce, sbBegin, sbEnd, raBegin, pow(2,k));
-				//leftArms = kmpMatching();
-				for ( size_t i = 0; i < leftArms.size(); i++ ){
-
-					//a = lcSuffix(lce, j*pow(2,k) -1, (leftArms[i] -1) ); //TODO richtig um 1 verringert?
-
-					//s = lcPrefix(lce, (j+1)+pow(2,k) , (leftArms[i] + pow(2,k)) );
+				
+				for ( size_t i = 0; i < leftArms.size() && leftArms[i] < raBegin; i++ ){
 					
-					//TODO Werte hier sind falsch
-					cout << (j+1)+pow(2,k) << " " << (leftArms[i] + pow(2,k)) << endl;
-					//a = lcPrefix(lce, j*pow(2,k) -1, (leftArms[i] -1) );
-					a = lcPrefix(lce , (leftArms[i] -1), j*pow(2,k) -1 );
-					cout << "gggg" << endl;
-					s = lcSuffix(lce, (j+1)+pow(2,k) , (leftArms[i] + pow(2,k)) );
-
-					
-					//TODO muessen Positionen noch um 1 verringert werden? Laenge richtig?
-					gappedRep = new alphaGappedRepeat(leftArms[i]-a, raBegin-a, a+s+pow(2,k));
-					cout << "leftArm: " << leftArms[i] << " rightArm: " << raBegin << " a: " << a << endl;
-					//printGappedRepeat(gappedRep);
-
-					//auf negative Luecke pruefen und s. "To avoid duplicates (S.15)"
-					//wenn gueltig: einfuegen
-					if( gappedRep->lArm < gappedRep->rArm && j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) ){
-						grList->push_back(gappedRep);
+					laBegin = leftArms[i];
+					//moegliche Periode p bestimmen
+					p = leftArms[i+1]-leftArms[i];
+					if ( lcPrefix(lce, laBegin, raBegin) < p ){
+						p=0;
 					}
-					//TODO Fallunterscheidung fuer periodischen Fall
 
+					//Periode pruefen
+					for (size_t g = i+1; g < leftArms.size() && leftArms[g]<=raBegin && p!=0; g++){
+						if ( leftArms[g-1]+p != leftArms[g] //&& raEnd - raBegin +1 < p
+							|| lcPrefix(lce, leftArms[g-1], leftArms[g]) < p  ){
+							p=0;
+						}
+					}
+
+
+					// falls kein run
+					if ( p==0 ){
+
+						a = lcSuffix(lce , (laBegin -1), j*pow(2,k) -1 );
+						s = lcPrefix(lce, (laBegin + pow(2,k)), (j+1)*pow(2,k) );	
+						gappedRep = new alphaGappedRepeat(laBegin-a, raBegin-a, a+s+pow(2,k));
+						
+						//auf negative Luecke pruefen und s. "To avoid duplicates (S.15)"
+						//wenn gueltig: einfuegen
+						if ( isValid(gappedRep,alpha) && pow(2,k+1) <= gappedRep->length < pow(2,k+2) 
+							&& j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) && j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+							grList->push_back(gappedRep);//TODO
+						}
+						/* //alt
+						if( gappedRep->lArm < gappedRep->rArm && j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) 
+							&& j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+							grList->push_back(gappedRep);
+						}
+						*/
+						
+					}
+
+
+					// periodischer Fall mit Fallunterscheidung
+					else{
+						rLLength = findLongestPeriod(lce, laBegin, p); //TODO findLongestPeriod() korrigieren
+						rRLength = findLongestPeriod(lce, raBegin, p);
+						/*
+						if (raBegin == 2 && laBegin==0){
+							cout << "k=" << k << " laBegin=" << laBegin << " p=" << p << endl;
+							cout << rLLength << endl;
+							cout << rRLength << endl;
+						}
+						*/
+
+						//case a
+						s = lcSuffix(lce, laBegin+rLLength, raBegin+rRLength)-1;
+						gappedRep = new alphaGappedRepeat(laBegin, raBegin+rRLength-rLLength , rLLength+s);
+						//pruefen und hinzufuegen
+						if ( isValid(gappedRep,alpha) && pow(2,k+1) <= gappedRep->length && gappedRep->length < pow(2,k+2) 
+							&& j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) && j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+							//grList->push_back(gappedRep);//TODO
+						}
+
+						//case b
+						helpLength = lcSuffixPrefix(lce, raBegin+rRLength, laBegin); //TODO -1?
+						//TODO Bedingung in Schleife so richtig oder +/-1?
+						for (size_t h = 0; raBegin+rRLength-(helpLength-p*h)-laBegin <= alpha*(helpLength-p*h) ; h++){
+							gappedRep = new alphaGappedRepeat( laBegin, raBegin+rRLength-(helpLength-p*h) , 
+																helpLength-p*h );
+							//pruefen und hinzufuegen
+							if ( isValid(gappedRep,alpha) && pow(2,k+1) <= gappedRep->length && gappedRep->length < pow(2,k+2)
+								&&	j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) && j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+								//grList->push_back(gappedRep);//TODO
+							}
+						}
+						
+						//case c
+						stillValid = true;
+						for (size_t h = 0; stillValid; h++){
+							if ( lcSuffix(lce, laBegin, raBegin+p*h) >= rLLength ){
+								gappedRep = new alphaGappedRepeat(laBegin, raBegin+p*h, rLLength);
+								//pruefen und hinzufuegen
+								if ( isValid(gappedRep,alpha) && pow(2,k+1)<=gappedRep->length && gappedRep->length<pow(2,k+2) 
+									&& j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) 
+									&& j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+									//grList->push_back(gappedRep);//TODO
+								}
+								else{
+									stillValid = false;
+								}
+							}
+							else{
+								stillValid = false;
+							}
+						}
+
+						//case d
+						helpLength = lcSuffixPrefix(lce, laBegin+rLLength, raBegin); //TODO -1?
+						gappedRep = new alphaGappedRepeat(laBegin+rLLength-helpLength, raBegin, helpLength);
+						//pruefen und hinzufuegen
+						if ( isValid(gappedRep,alpha) && pow(2,k+1) <= gappedRep->length && gappedRep->length < pow(2,k+2) 
+							&& j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) && j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+							//grList->push_back(gappedRep);//TODO
+						}
+						
+						//case e
+						stillValid = true;
+						for (size_t h = 0; stillValid; h++){
+							if ( lcSuffix(lce, laBegin+p*h, raBegin) >= rRLength ){
+								gappedRep = new alphaGappedRepeat(laBegin+p*h, raBegin, rRLength);
+								if ( isValid(gappedRep,alpha) && pow(2,k+1)<=gappedRep->length && gappedRep->length<pow(2,k+2) 
+									&& j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) 
+									&& j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+									//grList->push_back(gappedRep);//TODO
+									
+								}
+								else{
+									stillValid = false;
+								}
+							}
+							else{
+								stillValid = false;
+							}
+						}
+
+
+						//case f
+						s = lcSuffix(lce, laBegin+rLLength, raBegin+rRLength)-1;
+						gappedRep = new alphaGappedRepeat(laBegin+rLLength+-rRLength, raBegin, rRLength+s);
+						//pruefen und hinzufuegen
+						if ( isValid(gappedRep,alpha) && pow(2,k+1) <= gappedRep->length && gappedRep->length < pow(2,k+2) 
+							&& j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) && j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+							//grList->push_back(gappedRep);//TODO
+						}
+
+						//case g
+						a = lcSuffix(lce, laBegin, raBegin)-1;
+						if ( a>0 ){ //sonst wird bedingung nicht erfüllt
+							helpLength = lcPrefix(lce, laBegin-a, raBegin-a);
+							gappedRep = new alphaGappedRepeat(laBegin-a, raBegin-a, helpLength);
+						
+							//pruefen und hinzufuegen
+							if ( isValid(gappedRep,alpha) && pow(2,k+1) <= gappedRep->length && gappedRep->length < pow(2,k+2) 
+								&& j*pow(2,k)+sbBegin <= gappedRep->rArm+pow(2,k) && j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+								//grList->push_back(gappedRep);//TODO
+							}
+						}
+						
+						
+						
+						
+						
+					}
 				}
 			}	
 		}
@@ -428,41 +580,6 @@ int calcShortArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*
 }
 
 
-
-
-
-
-
-//Funktion erweitert gapped repeat maximal nach links und rechts
-//bekommt LCE-Datenstruktur, Start- und Endposition des Superblocks, 
-//		  k (Armlaenge 2^k), j, "Startpositionen" beider y-Arme
-/*
-alphaGappedRepeat* extendArms (lceDataStructure lce, size_t sbBegin, size_t sbEnd, 
-								size_t k, size_t j, size_t raBegin, size_t laBegin) {
-	alphaGappedRepeat* rep = 0; //new alphaGappedRepeat(0,0,0);
-
-	size_t p; //TODO Periode bestimmen / auslesen
-	//bestimme rl und rr mit Lemma 17 (nur fuer periodischen Fall)
-	size_t rl = findLongestPeriod(lce, laBegin, p);
-	size_t rr = findLongestPeriod(lce, raBegin, p);
-	
-	//case a
-	
-	//case b
-	
-	//case c
-	
-	//case d
-	
-	//case e
-	
-	//case f
-	
-	//case g
-		
-	return rep;
-}
-*/
 
 
 //Berechnet Block-Repraesentation auf w
@@ -503,12 +620,12 @@ vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 	size_t size = lce->length;
 	double lgn = log2((double)size);
 
-	//vector<int> blockRep;
-	//blockRep.reserve(size/ ( (pow(2,k)) * log2(size)) +1 );
+	vector<int> blockRep;
+	blockRep.reserve(size/ ( (pow(2,k)) * log2(size)) +1 );
 
-	vector<int> clusters(size);
-	clusters[0]=0;
-	
+	//vector<int> clusters(size);
+	//clusters[0]=0;
+	/*
 	//Cluster des Suffix-Arrays bestimmen
 	for(size_t i = 1; i < size; i++){
 		if( lce->sa[i] > lgn ){
@@ -518,16 +635,15 @@ vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 			clusters[i] = clusters[i-1]+1;
 		}
 	}
-
-	/* folgendes ueberfluessig, es werden nur startpositionen benoetigt
+	*/
+	
 	//Bestimme Blockrepraesentation
 	for(size_t i = 0; i <= size/ ( (pow(2,k)) * log2(size)) +1; i++){
-		blockRep.push_back( clusters[lce->isa[i*(2^k)*log2(size)]] );
+		//TODO so richtig?
+		blockRep.push_back( i*pow(2,k)*log2(size) );
 		//xxxxxxxxxxxxxxx//blockRep.push_back(lce.isa[i*log2(size)]);
 	}
 	return blockRep;
-	*/
-	return clusters;
 }
 
 
@@ -581,7 +697,7 @@ int binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, size_t ySt
 
 //Funktion zur Berechnung alpha-gapped repeats mit kurzen Armen
 template<typename lceDataStructure>
-int calcLongArm (lceDataStructure*& lce, float alpha, vector<alphaGappedRepeat*> *grList){
+int calcLongArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*> *grList){
 	size_t n = lce->length;
 	vector<int> blockRep = calcBlockRep(lce);
 	stringstream ss;

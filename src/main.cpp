@@ -16,10 +16,10 @@
 using namespace std;
 using namespace sdsl;
 
-int mainCalc1 ( string text, float alpha ){
+//naive iterative Berechnung
+int mainCalc1 ( string text, size_t alpha ){
 //Stringstats erstellen
     const StringStats stats = StringStats(std::move(text));
-    
     //Stringstatsausgabe als Test
     //stats.print(FLAGS_zeroindex);
     //cout << "gg " << stats.sa << endl;
@@ -42,6 +42,8 @@ int mainCalc1 ( string text, float alpha ){
     size_t realY;
     const char* textchar = text.c_str();
     size_t textlength = text.size();
+	vector<alphaGappedRepeat*> grList;
+	alphaGappedRepeat* gappedRep;
     
     for(size_t i=0; i<= n-2; i++){
         for(size_t j=i+1; j <= n-1 && (text[stats.sa[i]] == text[stats.sa[j]]); j++){
@@ -54,7 +56,9 @@ int mainCalc1 ( string text, float alpha ){
                     length = ceil((r-l)/alpha);
                     length = naivComp(textchar, l, r, textlength);
                     if (length >= ceil((r-l)/alpha)){
-                        cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+                        //cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+						gappedRep = new alphaGappedRepeat(l,r,length);
+						grList.push_back(gappedRep);
                     }
                 }
                 else if( realY < y){                         //kurzer Abstand im Suffix-Array
@@ -62,7 +66,9 @@ int mainCalc1 ( string text, float alpha ){
                     r = max(stats.sa[i], stats.sa[j]);
                     length = lcpMin( stats, i, j );
                     if (length >= ceil((r-l)/alpha)){
-                        cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+                        //cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+						gappedRep = new alphaGappedRepeat(l,r,length);
+						grList.push_back(gappedRep);
                     }
                     
                 }
@@ -71,7 +77,9 @@ int mainCalc1 ( string text, float alpha ){
                     r = max(stats.sa[i], stats.sa[j]);
                     length = lcpRmqMin( stats, rmq, i, j);
                     if (length >= ceil((r-l)/alpha)){
-                        cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+                        //cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+						gappedRep = new alphaGappedRepeat(l,r,length);
+						grList.push_back(gappedRep);
                     }
                 }
                 
@@ -79,15 +87,26 @@ int mainCalc1 ( string text, float alpha ){
         }
     }
     
+	printGappedRepeat(grList);
 	return 0;
 }
 
-
-int mainCalc2 ( string text, float alpha ){
+//Berechnung von Gawrychowski, verwendet nur die Technik fuer kurze Arme und einen Superblock
+int mainCalc2 ( string text, size_t alpha ){
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat*> grList;
 	//calc1Arm(lce, alpha, &grList);
 	calcShortArm (lce, alpha, &grList);
+	cout << "alpha-gapped repeats:" << endl;
+	printGappedRepeat(grList);
+	return 0;
+}
+
+int mainCalc3 ( string text, size_t alpha ){
+	lceDataStructure* lce = new lceDataStructure(text);
+	vector<alphaGappedRepeat*> grList;
+	//calc1Arm(lce, alpha, &grList);
+	//calcShortArm (lce, alpha, &grList);
 	//calcLongArm (lce, alpha, &grList);
 	cout << "alpha-gapped repeats:" << endl;
 	printGappedRepeat(grList);
@@ -108,7 +127,7 @@ int main(int argc, char *argv[]){
 		if(test == "test"){
 			cout << "Dies ist ein Test" << endl;
 
-			string file0 = "data/beispiel.txt";
+			string file0 = "data/beispiel4.txt";
   	  		ifstream inFile0;
   			inFile0.open(file0);
     		stringstream strStream0;
@@ -121,57 +140,20 @@ int main(int argc, char *argv[]){
 			string text2 = "aaaaaaaaaa";
 			string text3 = "abac";
 			
-			lceDataStructure* lce = new lceDataStructure(text3);
-			size_t lceabfrage;
+			lceDataStructure* lce = new lceDataStructure(text0);
+			//size_t lceabfrage;
 
-			cout << "length: " << lce->length << endl;
-			cout << "text: " << lce->text << endl;
-			cout << "sa:  " << lce->sa << endl;
-			cout << "isa: " << lce->isa << endl;
-			cout << "lcp: " << lce->lcp << endl;
-			lceabfrage = lcSuffix (lce, 0, 2);
-			cout << "lceabfrage: " << lceabfrage << endl;
-			
-			/*
-			cout << "text: " << lce->text << endl;
-			cout << "length: " << lce->length << endl;
-			cout << "sa: " << lce->sa << endl;
-			cout << "isa: " << lce->isa << endl;
-			cout << "lcp: " << lce->lcp << endl;
-			cout << "length (text+mtext): " << lce->text.size() << endl;
-			cout << lce->text[10] << lce->text[13] << lce->text[14] << endl;
-			*/
-			//cout << "mtext: " << lce->mtext << endl;
-			//cout << "msa: " << lce->msa << endl;
-			//cout << "misa: " << lce->misa << endl;
-			//cout << "mlcp: " << lce->mlcp << endl;
-			
+			//cout << "length: " << lce->length << endl;
+			//cout << "text: " << lce->text << endl;
+			//cout << "sa:  " << lce->sa << endl;
+			//cout << "isa: " << lce->isa << endl;
+			//cout << "lcp: " << lce->lcp << endl;
 
-			/*
-			vector<int> vec (4);
-			cout << vec.capacity() << endl;
-			vec.reserve(28);
-			cout << vec.capacity() << endl;
-			vec[0] = 1;
-			vec.push_back (5);
-			cout << vec << endl;
-			cout << vec.size() << endl;
-			vec.push_back (5);
-			cout << vec << endl;
-			cout << vec.size() << endl;
-			*/
-			/*
-			alphaGappedRepeat* agr1 = new alphaGappedRepeat(5,29,3);
-			alphaGappedRepeat* agr2 = new alphaGappedRepeat(7,10,2);
-			alphaGappedRepeat* agr3 = new alphaGappedRepeat(12,25,9);
-			alphaGappedRepeat* agr4 = new alphaGappedRepeat(15,22,5);
-			vector<alphaGappedRepeat*> vec;
-			vec.push_back(agr1);
-			vec.push_back(agr2);
-			vec.push_back(agr3);
-			vec.push_back(agr4);
-			printGappedRepeat(vec);
-			*/
+			vector<int> leftArms = kmpMatching(lce, 0, 36, 32 , 2);
+			cout << leftArms << endl;
+			
+			
+			
 
 			
 
@@ -196,7 +178,7 @@ int main(int argc, char *argv[]){
     string text = strStream.str();
 
 	istringstream ss(argv[1]);
-	float alpha;
+	size_t alpha;
     if (!(ss >> alpha)){
         cerr << "Ungueltige Zahl " << argv[1] << '\n';
         return 1;
@@ -216,6 +198,9 @@ int main(int argc, char *argv[]){
     }
 	else if ( variante == "v2" ){
     	mainCalc2 ( text, alpha );
+    }
+	else if ( variante == "v3" ){
+    	mainCalc3 ( text, alpha );
     }
 	else {
 		cerr << "Ungueltige Variante " << argv[3] << '\n';
