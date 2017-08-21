@@ -87,6 +87,7 @@ int mainCalc1 ( string text, size_t alpha ){
         }
     }
     
+	cout << "alpha-gapped repeats:" << endl;
 	printGappedRepeat(grList);
 	return 0;
 }
@@ -95,14 +96,28 @@ int mainCalc1 ( string text, size_t alpha ){
 int mainCalc2 ( string text, size_t alpha ){
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat*> grList;
-	//calc1Arm(lce, alpha, &grList);
-	calcShortArm (lce, alpha, &grList);
+	calc1Arm(lce, alpha, &grList);			//TODO ist auskommentiert zum testen
+	calcShortArm (lce, alpha, &grList, true);
 	cout << "alpha-gapped repeats:" << endl;
 	printGappedRepeat(grList);
 	return 0;
 }
 
+//Berechnung von Gawrychowski, verwendet Blockrepraesentation
 int mainCalc3 ( string text, size_t alpha ){
+	size_t n0 = text.size();
+	size_t n1 = n0;
+
+	while ( n1/log2(n1) != (int)(n1/log2(n1)) ){
+		n1++;
+	}
+
+	//string textX = text0;
+	for( size_t i = n0; i < n1; i++ ){
+		text = text + '\1';
+	}
+
+
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat*> grList;
 	//calc1Arm(lce, alpha, &grList);
@@ -127,7 +142,7 @@ int main(int argc, char *argv[]){
 		if(test == "test"){
 			cout << "Dies ist ein Test" << endl;
 
-			string file0 = "data/beispiel4.txt";
+			string file0 = "data/beispiel.txt";
   	  		ifstream inFile0;
   			inFile0.open(file0);
     		stringstream strStream0;
@@ -135,27 +150,82 @@ int main(int argc, char *argv[]){
     		const string text0 = strStream0.str();
 
 			cout << text0 << endl;
+			cout << text0.size() << endl;
 
+			/*
+			//TODO fuer lange Arme verwenden
+			size_t n0 = text0.size();
+			//size_t n0 = 17;
+			size_t n1 = n0;
+
+			//size_t n0 = 16;
+
+			float logn = log2(n0);
+			while ( n1/log2(n1) != (int)(n1/log2(n1)) ){
+				n1++;
+			}
+			cout << n0 << " " << n1 << endl;
+
+			string textX = text0;
+			for( size_t i = n0; i < n1; i++ ){
+				textX = textX + '\1';
+			}
+
+			cout << textX<< endl;
+			cout << textX.size() << endl;
+
+			/*
+			string textX = text0+ '\1';
+
+			cout << textX << endl;
+			cout << textX.size() << endl;
+			
 			string text1 = "gabbdefabbx";
 			string text2 = "aaaaaaaaaa";
 			string text3 = "abac";
+			*/
+			
 			
 			lceDataStructure* lce = new lceDataStructure(text0);
-			//size_t lceabfrage;
+			size_t lceabfrage;
 
-			//cout << "length: " << lce->length << endl;
-			//cout << "text: " << lce->text << endl;
-			//cout << "sa:  " << lce->sa << endl;
-			//cout << "isa: " << lce->isa << endl;
-			//cout << "lcp: " << lce->lcp << endl;
+			cout << "length: " << lce->length << endl;
+			cout << "text: " << lce->text << endl;
+			cout << "sa:  " << lce->sa << endl;
+			cout << "isa: " << lce->isa << endl;
+			cout << "lcp: " << lce->lcp << endl;
+			cout << "mtext: " << lce->mtext << endl;
+			cout << "msa:  " << lce->msa << endl;
+			cout << "misa: " << lce->misa << endl;
+			cout << "mlcp: " << lce->mlcp << endl;
 
-			vector<int> leftArms = kmpMatching(lce, 0, 36, 32 , 2);
-			cout << leftArms << endl;
+			//vector<int> leftArms = kmpMatching(lce, 0, 36, 32 , 2);
+			//cout << leftArms << endl;
 			
+			//cout << lce->text.size() << " " << lce->length  << endl;
+			cout << "lce: " << lcPrefix(lce, 1, 7) << endl;
 			
-			
+			/*
+			vector<int> *vek;// = new vector<int>(5,0);
+			vek =  new vector<int>(5,0);
+			(*vek)[2]= 3;
+			cout << *vek << endl;
+			cout << "hi" << (*vek)[3] << endl;
+			cout << (*vek).size() << endl;
+			*/
+			/*
+			size_t test1;
+			size_t test2;
+			size_t test3;
+			test1 = 5;
+			test2 = 6;
+			test3 = 1;
 
-			
+			cout << test1 - test2 << endl;
+			cout << (int)test1 - test2*(int)test3 << endl;
+			cout << test1 - (int)test2 << endl;
+			cout << (int)test1 - (int)test2 << endl;
+			*/
 
 		}
 	}
