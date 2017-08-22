@@ -304,7 +304,7 @@ vector<int> calcClusterStarts(const std::string text, const vector<int> sa){
 	vector<int> clusterStarts;
 	clusterStarts.reserve(size);
 	clusterStarts.push_back(0);
-	int pos = 1;
+	size_t pos = 1;
 	for(int i=1; i < size; i++){
 		if(text[sa[i-1]] != text[sa[i]]){
 			clusterStarts.push_back(i);
@@ -320,29 +320,30 @@ vector<int> calcClusterStarts(const std::string text, const vector<int> sa){
 //Funktion zur Berechnung alpha-gapped repeats mit Armen der Laenge 1
 //template<typename vektor_type>
 int calc1Arm(lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*> *grList){
+	size_t n = lce->text.size();
 	vector<int> clusterStarts = calcClusterStarts(lce->text, lce->sa);
+	clusterStarts.push_back(n+1);
 	size_t m = clusterStarts.size();
 	//size_t n = lce->length;
-	size_t n = lce->text.size();
 	vector<int> sa = lce->sa;
 	alphaGappedRepeat* gappedRep;
 
+	
 	//innerhalb der Cluster des SA nach Startpositionen sortieren
 	for (size_t i = 0; i<m-1; i++){
 		sort(sa.begin()+clusterStarts[i], sa.begin()+clusterStarts[i+1]);
+
 	}
 
+
 	//Suche der alpha-gapped repeats mit Armlaenge 1
-	for (size_t i = 0; i<n-1; i++){
+	for (size_t i = 0; i<n; i++){
 		//alpha*2, da unser suffix array groeßer ist als angenommen 
 		//(da der text einmal vorw und einmal rueckw gespeichert ist
-		for (size_t j = i+1; j<=i+alpha*2 && j<n; j++){
+		for (size_t j = i+1; j<=i+alpha && j<n+1; j++){
+			
 				if (lce->text[sa[i]]==lce->text[sa[j]]){
-					//gapRep gefunden
-					//TODO gapped repeats am anfgang/ende eines runs werden vergessen
-					/*
-					if ( (i==0 || lce->text[sa[i]-1]!=lce->text[sa[j]-1]) &&
-						 (j==n-1 || lce->text[sa[i]+1]!=lce->text[sa[j]+1])){ */
+					//cout << sa[i] << " " << sa[j] << endl;
 					if ( ( i==0 && lce->text[sa[i]+1]!=lce->text[sa[j]+1] )
 						|| ( j==n-1 && lce->text[sa[i]-1]!=lce->text[sa[j]-1] )
 						|| i+1 == j
@@ -359,7 +360,7 @@ int calc1Arm(lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*> *g
 				
 				//sobald cluster verlassen wird nicht weiter pruefen
 				else{
-					j = i + alpha*2 + 1;
+					j = i + alpha + 1;
 				}
 				
 		}
@@ -657,9 +658,22 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 
 						//Anzahl Occurances = rRLength/p
 						//Squares
+						/*
 						for ( size_t h = 0; h <= rRLength/p -2; h++){ //Schleife ueber Position
 							for ( size_t g = 1; (h+g)*p +g*p <= rRLength ; g++){ //Schleife ueber Laenge
 								gappedRep = new alphaGappedRepeat(rRhoBegin+h*p, rRhoBegin+h*p+g*p, g*p);
+								if ( isValid(gappedRep,alpha) && pow(2,k+1) <= gappedRep->length 
+									&& gappedRep->length < pow(2,k+2) && j*pow(2,k)+sbBegin < gappedRep->rArm+pow(2,k) 
+									&& j*pow(2,k)+sbBegin >= gappedRep->rArm ){
+									grList->push_back(gappedRep);//TODO
+								}
+							}
+						}
+						*/
+
+						for ( size_t h = 0; h <= rRLength -2; h++){ //Schleife ueber Position
+							for ( size_t g = 1; (h+g) +g <= rRLength ; g++){ //Schleife ueber Laenge
+								gappedRep = new alphaGappedRepeat(rRhoBegin+h, rRhoBegin+h+g, g);
 								if ( isValid(gappedRep,alpha) && pow(2,k+1) <= gappedRep->length 
 									&& gappedRep->length < pow(2,k+2) && j*pow(2,k)+sbBegin < gappedRep->rArm+pow(2,k) 
 									&& j*pow(2,k)+sbBegin >= gappedRep->rArm ){

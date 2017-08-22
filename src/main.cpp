@@ -44,10 +44,14 @@ int mainCalc1 ( string text, size_t alpha ){
     size_t textlength = text.size();
 	vector<alphaGappedRepeat*> grList;
 	alphaGappedRepeat* gappedRep;
+
     
-    for(size_t i=0; i<= n-2; i++){
-        for(size_t j=i+1; j <= n-1 && (text[stats.sa[i]] == text[stats.sa[j]]); j++){
-            if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] ){ //doppelte verhindern
+    //for(size_t i=0; i<= n-2; i++){
+	for(size_t i=0; i < n; i++){
+		//cout << stats.sa[i] << endl;
+        //for(size_t j=i+1; j <= n-1 && (text[stats.sa[i]] == text[stats.sa[j]]); j++){
+		for(size_t j=i+1; j < n && (text[stats.sa[i]] == text[stats.sa[j]]); j++){
+            //if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] ){ //doppelte verhindern
                 realX = abs(stats.sa[i]-stats.sa[j]);
                 realY = j - i;
                 if( realX < x && (realX * y) < (realY * x) ){         //wenig zeichenvergleiche noetig
@@ -55,20 +59,26 @@ int mainCalc1 ( string text, size_t alpha ){
                     r = max(stats.sa[i], stats.sa[j]);
                     length = ceil((r-l)/alpha);
                     length = naivComp(textchar, l, r, textlength);
-                    if (length >= ceil((r-l)/alpha)){
-                        //cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
-						gappedRep = new alphaGappedRepeat(l,r,length);
-						grList.push_back(gappedRep);
+                    if (length >= ceil((r-l)/(float)alpha)){
+						if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] 
+							|| l+length == r ){		//doppelte verhindern
+                        	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+							gappedRep = new alphaGappedRepeat(l,r,length);
+							grList.push_back(gappedRep);
+						}
                     }
                 }
                 else if( realY < y){                         //kurzer Abstand im Suffix-Array
                     l = min(stats.sa[i], stats.sa[j]);
                     r = max(stats.sa[i], stats.sa[j]);
                     length = lcpMin( stats, i, j );
-                    if (length >= ceil((r-l)/alpha)){
-                        //cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
-						gappedRep = new alphaGappedRepeat(l,r,length);
-						grList.push_back(gappedRep);
+                    if (length >= ceil((r-l)/(float)alpha)){
+                        if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] 
+							|| l+length == r ){		//doppelte verhindern
+                        	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+							gappedRep = new alphaGappedRepeat(l,r,length);
+							grList.push_back(gappedRep);
+						}
                     }
                     
                 }
@@ -76,14 +86,17 @@ int mainCalc1 ( string text, size_t alpha ){
                     l = min(stats.sa[i], stats.sa[j]);
                     r = max(stats.sa[i], stats.sa[j]);
                     length = lcpRmqMin( stats, rmq, i, j);
-                    if (length >= ceil((r-l)/alpha)){
-                        //cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
-						gappedRep = new alphaGappedRepeat(l,r,length);
-						grList.push_back(gappedRep);
+                    if (length >= ceil((r-l)/(float)alpha)){
+                        if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] 
+							|| l+length == r ){		//doppelte verhindern
+                        	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
+							gappedRep = new alphaGappedRepeat(l,r,length);
+							grList.push_back(gappedRep);
+						}
                     }
                 }
                 
-            }
+            //}
         }
     }
     
