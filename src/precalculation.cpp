@@ -65,7 +65,7 @@ int main(){
     const char* textchar = text.c_str();
     size_t length = text.size();
     while(timeNaiv < timeLCPRMQ){                 //nur eine von beiden Schleifen
-    //while( x <= 2000){
+    //while( x1 <= 10000){
         x1++;
         for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
@@ -73,7 +73,7 @@ int main(){
             arrNaiv[k] = 0.0 + clock() - tstart;
         }
         timeNaiv = median(arrNaiv);
-//         if (x % 100 == 0){
+//         if (x1 % 100 == 0){
 //             cout << x << "       "<< timeNaiv << endl;
 //         }
     }
@@ -85,6 +85,7 @@ int main(){
     //Dauer fuer iterative Minimumsuche im LCP-Array
     size_t y1 = 0;
     while(timeLCP < timeLCPRMQ){
+	//while( y1 <= 10000){
         y1++;
         for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
@@ -93,6 +94,9 @@ int main(){
         }
         timeLCP = median(arrLCP);
     }
+//         if (y1 % 100 == 0){
+//             cout << y << "       "<< timeLCP << endl;
+//         }
     cout << "time lcp: " << timeLCP << endl;
     cout << "y: " << y1 << endl;
     

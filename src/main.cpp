@@ -64,7 +64,9 @@ int mainCalc1 ( string text, size_t alpha ){
 							|| l+length == r ){		//doppelte verhindern
                         	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
 							gappedRep = new alphaGappedRepeat(l,r,length);
-							grList.push_back(gappedRep);
+							//grList.push_back(gappedRep); //auskommentiert fuer Messungen
+							delete gappedRep;
+							gappedRep=0;
 						}
                     }
                 }
@@ -77,7 +79,9 @@ int mainCalc1 ( string text, size_t alpha ){
 							|| l+length == r ){		//doppelte verhindern
                         	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
 							gappedRep = new alphaGappedRepeat(l,r,length);
-							grList.push_back(gappedRep);
+							//grList.push_back(gappedRep);	//auskommentiert fuer Messungen
+							delete gappedRep;
+							gappedRep=0;
 						}
                     }
                     
@@ -91,7 +95,9 @@ int mainCalc1 ( string text, size_t alpha ){
 							|| l+length == r ){		//doppelte verhindern
                         	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
 							gappedRep = new alphaGappedRepeat(l,r,length);
-							grList.push_back(gappedRep);
+							//grList.push_back(gappedRep);	//auskommentiert fuer Messungen
+							delete gappedRep;
+							gappedRep=0;
 						}
                     }
                 }
@@ -100,8 +106,8 @@ int mainCalc1 ( string text, size_t alpha ){
         }
     }
     
-	cout << "alpha-gapped repeats:" << endl;
-	printGappedRepeat(grList);
+	//cout << "alpha-gapped repeats:" << endl;
+	//printGappedRepeat(grList);
 	return 0;
 }
 
@@ -109,10 +115,23 @@ int mainCalc1 ( string text, size_t alpha ){
 int mainCalc2 ( string text, size_t alpha ){
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat*> grList;
-	calc1Arm(lce, alpha, &grList);			//TODO ist auskommentiert zum testen
+	calc1Arm(lce, alpha, &grList);
 	calcShortArm (lce, alpha, &grList, true);
-	cout << "alpha-gapped repeats:" << endl;
-	printGappedRepeat(grList);
+	//cout << "alpha-gapped repeats:" << endl;
+	//printGappedRepeat(grList);
+	return 0;
+}
+
+//VARIANTE VON CALCSHORTARMS, DIE NUR SQUARES BERECHNET,
+//WIRD NUR ZUM VERGLEICH VON MESSWERTEN VERWENDET
+int mainCalcSquares ( string text, size_t alpha ){
+	alpha = 1;
+	lceDataStructure* lce = new lceDataStructure(text);
+	vector<alphaGappedRepeat*> grList;
+	calc1Arm(lce, alpha, &grList);
+	calcSQUARES (lce, &grList, true);
+	//cout << "alpha-gapped repeats:" << endl;
+	//printGappedRepeat(grList);
 	return 0;
 }
 
@@ -240,6 +259,7 @@ int main(int argc, char *argv[]){
 			cout << (int)test1 - (int)test2 << endl;
 			*/
 
+
 		}
 	}
 	
@@ -284,6 +304,9 @@ int main(int argc, char *argv[]){
     }
 	else if ( variante == "v3" ){
     	mainCalc3 ( text, alpha );
+    }
+	else if ( variante == "vs" ){
+    	mainCalcSquares ( text, alpha );
     }
 	else {
 		cerr << "Ungueltige Variante " << argv[3] << '\n';
