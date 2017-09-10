@@ -73,7 +73,7 @@ int main(){
             arrNaiv[k] = 0.0 + clock() - tstart;
         }
         timeNaiv = median(arrNaiv);
-//         if (x1 % 100 == 0){
+//         if (x1 % 100 == 0){		//Ausgabe zum Messen
 //             cout << x << "       "<< timeNaiv << endl;
 //         }
     }
@@ -94,7 +94,7 @@ int main(){
         }
         timeLCP = median(arrLCP);
     }
-//         if (y1 % 100 == 0){
+//         if (y1 % 100 == 0){		//Ausgabe zum Messen
 //             cout << y << "       "<< timeLCP << endl;
 //         }
     cout << "time lcp: " << timeLCP << endl;

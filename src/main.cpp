@@ -18,22 +18,14 @@ using namespace sdsl;
 
 //naive iterative Berechnung
 int mainCalc1 ( string text, size_t alpha ){
-//Stringstats erstellen
+	//Stringstats erstellen
     const StringStats stats = StringStats(std::move(text));
-    //Stringstatsausgabe als Test
-    //stats.print(FLAGS_zeroindex);
-    //cout << "gg " << stats.sa << endl;
     
     //RMQ auf LCP-Array erstellen
     rmq_succinct_sada<> rmq(&stats.lcp);
     
-    //Ausgabe einer RMQ als Test
-    //cout << "-----------------------------------" << endl;
-    //cout << "RMQ: " << stats.lcp[rmq(5,7)] << endl;
-    
+
     //Initialisierungen
-    
-    
     size_t n = stats.sa.size();
     size_t length;
     size_t l;
@@ -46,12 +38,9 @@ int mainCalc1 ( string text, size_t alpha ){
 	alphaGappedRepeat* gappedRep;
 
     
-    //for(size_t i=0; i<= n-2; i++){
 	for(size_t i=0; i < n; i++){
-		//cout << stats.sa[i] << endl;
-        //for(size_t j=i+1; j <= n-1 && (text[stats.sa[i]] == text[stats.sa[j]]); j++){
+
 		for(size_t j=i+1; j < n && (text[stats.sa[i]] == text[stats.sa[j]]); j++){
-            //if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] ){ //doppelte verhindern
                 realX = abs(stats.sa[i]-stats.sa[j]);
                 realY = j - i;
                 if( realX < x && (realX * y) < (realY * x) ){         //wenig zeichenvergleiche noetig
@@ -102,7 +91,6 @@ int mainCalc1 ( string text, size_t alpha ){
                     }
                 }
                 
-            //}
         }
     }
     
@@ -136,11 +124,12 @@ int mainCalcSquares ( string text, size_t alpha ){
 }
 
 //Berechnung von Gawrychowski, verwendet Blockrepraesentation
+//Funktioniert nicht
 int mainCalc3 ( string text, size_t alpha ){
 	size_t n0 = text.size();
 	size_t n1 = n0;
 
-	while ( n1/log2(n1) != (int)(n1/log2(n1)) ){
+	while ( n1/log2(n1) != (int)(n1/ceil(log2(n1))) ){
 		n1++;
 	}
 
@@ -152,9 +141,9 @@ int mainCalc3 ( string text, size_t alpha ){
 
 	lceDataStructure* lce = new lceDataStructure(text);
 	vector<alphaGappedRepeat*> grList;
-	//calc1Arm(lce, alpha, &grList);
-	//calcShortArm (lce, alpha, &grList);
-	//calcLongArm (lce, alpha, &grList);
+	calc1Arm(lce, alpha, &grList);
+	calcShortArm (lce, alpha, &grList, false);
+	calcLongArm (lce, alpha, &grList);
 	cout << "alpha-gapped repeats:" << endl;
 	printGappedRepeat(grList);
 	return 0;
@@ -172,6 +161,7 @@ int main(int argc, char *argv[]){
         	return 1;
     	}
 		if(test == "test"){
+			//nur zum Testen, ob Eingaben funktionieren
 			cout << "Dies ist ein Test" << endl;
 
 			string file0 = "data/beispiel.txt";
@@ -183,46 +173,13 @@ int main(int argc, char *argv[]){
 
 			cout << text0 << endl;
 			cout << text0.size() << endl;
-
-			/*
-			//TODO fuer lange Arme verwenden
-			size_t n0 = text0.size();
-			//size_t n0 = 17;
-			size_t n1 = n0;
-
-			//size_t n0 = 16;
-
-			float logn = log2(n0);
-			while ( n1/log2(n1) != (int)(n1/log2(n1)) ){
-				n1++;
-			}
-			cout << n0 << " " << n1 << endl;
-
-			string textX = text0;
-			for( size_t i = n0; i < n1; i++ ){
-				textX = textX + '\1';
-			}
-
-			cout << textX<< endl;
-			cout << textX.size() << endl;
-
-			/*
-			string textX = text0+ '\1';
-
-			cout << textX << endl;
-			cout << textX.size() << endl;
-			
-			string text1 = "gabbdefabbx";
-			string text2 = "aaaaaaaaaa";
-			string text3 = "abac";
-			*/
 			
 			
 			lceDataStructure* lce = new lceDataStructure(text0);
-			size_t lceabfrage;
 
 			cout << "length: " << lce->length << endl;
 			cout << "text: " << lce->text << endl;
+			cout << "ctext: " << lce->text.c_str() << endl;
 			cout << "sa:  " << lce->sa << endl;
 			cout << "isa: " << lce->isa << endl;
 			cout << "lcp: " << lce->lcp << endl;
@@ -230,35 +187,7 @@ int main(int argc, char *argv[]){
 			cout << "msa:  " << lce->msa << endl;
 			cout << "misa: " << lce->misa << endl;
 			cout << "mlcp: " << lce->mlcp << endl;
-
-			//vector<int> leftArms = kmpMatching(lce, 0, 36, 32 , 2);
-			//cout << leftArms << endl;
 			
-			//cout << lce->text.size() << " " << lce->length  << endl;
-			cout << "lce: " << lcPrefix(lce, 1, 7) << endl;
-			
-			/*
-			vector<int> *vek;// = new vector<int>(5,0);
-			vek =  new vector<int>(5,0);
-			(*vek)[2]= 3;
-			cout << *vek << endl;
-			cout << "hi" << (*vek)[3] << endl;
-			cout << (*vek).size() << endl;
-			*/
-			/*
-			size_t test1;
-			size_t test2;
-			size_t test3;
-			test1 = 5;
-			test2 = 6;
-			test3 = 1;
-
-			cout << test1 - test2 << endl;
-			cout << (int)test1 - test2*(int)test3 << endl;
-			cout << test1 - (int)test2 << endl;
-			cout << (int)test1 - (int)test2 << endl;
-			*/
-
 
 		}
 	}
@@ -303,7 +232,7 @@ int main(int argc, char *argv[]){
     	mainCalc2 ( text, alpha );
     }
 	else if ( variante == "v3" ){
-    	mainCalc3 ( text, alpha );
+    	//mainCalc3 ( text, alpha );			//funktioniert nicht
     }
 	else if ( variante == "vs" ){
     	mainCalcSquares ( text, alpha );

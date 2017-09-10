@@ -1,7 +1,17 @@
 cmake -H. -Bbuild
 cmake --build build -- -j3
-./build/src/gapRep2 2 beispiel.txt v1
+./build/src/gapRep2 "alpha" "text" "variante"
 
-eigene Tests starten mit ./build/src/gapRep2 test
+z.B.: ./build/src/gapRep2 2 beispiel.txt v1
+
+alpha: Groesse alpha, fuer welche alpha-Luecken-Quadrate bestimmt werden sollen
+
+text: Text auf dem gearbeitet werden soll. Muss im Ordner gaprep/data liegen
+
+variante: Algorithmus, der verwendet werden soll.
+Es stehen folgende Optionen zur Auswahl:
+	v1: naive Variante
+	v2: Variante nach Gawrychowski et al.
+	vs: berechnet nur Quadrate (mit Techniken von Gawrychowski et al.)
 
 

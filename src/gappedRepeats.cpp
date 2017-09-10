@@ -97,8 +97,8 @@ struct lceDataStructure {
 		//#define vektor_type sdsl::int_vector<>
 #endif
 
-	const std::string text;        //Text
-	const char* ctext;
+	const std::string &text;        //Text
+	//const char* ctext;
 	const size_t length;
 	const vektor_type sa;          //Suffix-Array
 	const vektor_type isa;         //inverted LCP-Array
@@ -107,7 +107,7 @@ struct lceDataStructure {
 	//Mirror-Image von ttext beginnt ab text[size+1]
 
     const std::string mtext;        //Mirror-Image
-	const char* mctext;
+	//const char* mctext;
     const vektor_type msa;
 	const vektor_type misa;
 	const vektor_type mlcp;
@@ -117,7 +117,7 @@ struct lceDataStructure {
 		//: text(ttext + '\0' + string ( ttext.rbegin(), ttext.rend() ))
 		//: text(ttext + '\0' + invertieren(ttext) )
 		: text(ttext)
-		, ctext(text.c_str())
+		//, ctext(text.c_str())
 		, length(ttext.size())
 		, sa(create_sa<vektor_type>(text, FLAGS_stripDollar))
 		, isa(inverse<vektor_type>(sa))
@@ -125,7 +125,7 @@ struct lceDataStructure {
         , rmq(&lcp)
         //, mtext(string ( text.rbegin(), text.rend() ))
 		, mtext( invertieren(ttext) )
-		, mctext(mtext.c_str())
+		//, mctext(mtext.c_str())
         , msa(create_sa<vektor_type>(mtext, FLAGS_stripDollar))
 		, misa(inverse<vektor_type>(msa))
 		, mlcp(create_lcp<vektor_type>(mtext, msa, misa))
@@ -145,7 +145,6 @@ struct alphaGappedRepeat {
     alphaGappedRepeat(size_t l, size_t r, size_t len) 
 		: lArm(l)
 		, rArm(r)
-		//, length(min(len,r-l)) //TODO pruefen
 		, length(len)
 	{
 	}    
@@ -222,13 +221,13 @@ int lcPrefix(lceDataStructure*& lce, size_t i, size_t j){
 	if (left == right){
 		return 0;
 	}
-	
 	size_t realX = j-i;
 	size_t realY = abs(right - left);
 	
+	//if(0){
 	if( realX < x && (realX * y) < (realY * x) ){         //wenig zeichenvergleiche noetig	
 		//durchlaeuft Text
-		return naivLCP(lce->ctext,i,j,lce->length); 
+		return naivLCP(lce->text.c_str(),i,j,lce->length); 
 	}
 	else if( realY < y){                         //kurzer Abstand im Suffix-Array
 		//durchlaeuft LCP-Array
@@ -257,14 +256,14 @@ int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){
 	if (left == right){
 		return 0;
 	}
-
 	size_t realX = j-i;
 	size_t realY = abs(right - left);
 	
+	//if(0){
 	if( realX < x && (realX * y) < (realY * x) ){         //wenig zeichenvergleiche noetig	
 		//durchlaeuft Text
 		//return naivLCP(lce->ctext,2*n-j,2*n-i,lce->length*2+1);
-		return naivLCP(lce->mctext,n-j-1,n-i-1,lce->length); 
+		return naivLCP(lce->mtext.c_str(),n-j-1,n-i-1,lce->length); 
 	}
 	else if( realY < y){                         //kurzer Abstand im Suffix-Array
 		//durchlaeuft LCP-Array
@@ -281,20 +280,6 @@ int lcSuffix(lceDataStructure*& lce, size_t i, size_t j){
 
 } 
 
-//TODO um "schnellere" LCE-Anfragen erweitern
-// gibt den longest common Prefix eines Suffixes an, welcher an i endet
-// und longest common suffix eines Prefixes ist, welcher an j beginnt
-// s. Fall (d): i linke Position, j rechte Position
-int lcSuffixPrefix(lceDataStructure*& lce, size_t i, size_t j){
-	size_t n = lce->length;
-	size_t left = min( lce->isa[2*n-i], lce->isa[j] );
-	size_t right = max( lce->isa[2*n-i], lce->isa[j] );
-	if (left == right){
-		return 0;
-	}
-	
-	return lce->lcp[ lce->rmq( left+1, right ) ];
-}
 
 //Berechnet die Startpostionen der Cluster des Suffix-Arrays fuer die Berechnung
 //von alpha-gapped repeats mit einer Armlaenge von 1
@@ -370,8 +355,7 @@ int calc1Arm(lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*> *g
 	return 0;
 }
 
-//TODO bearbeiten
-//Lemma 17:
+//Lemma 17 aus Paper von Gawrychowski:
 //Bekommt LCE-Datenstruktur, Startposition i eines Faktors und Periode p
 //gibt Laenge des laengsten Faktors aus
 size_t findLongestPeriod (lceDataStructure*& lce, size_t i, size_t p){
@@ -389,12 +373,12 @@ size_t findLongestPeriod (lceDataStructure*& lce, size_t i, size_t p){
 //Startposition y_rho ist letzter Wert im ausgegebenen Array
 vector<int> kmpMatching (lceDataStructure*& lce, size_t sbStart, size_t sbEnd, size_t raStart, size_t raLen){
 	
-	const char* text = lce->ctext;
+	const char* text = lce->text.c_str();
 	string rArm = (string)(text+raStart);
     vector<int> lcs(raLen + 1, -1);
 	vector<int> lArms;
 
-
+	//Pattern vorverarbeiten
 	for(int i = 1; i <= raLen; i++)
 	{
 		int pos = lcs[i - 1];
@@ -405,7 +389,7 @@ vector<int> kmpMatching (lceDataStructure*& lce, size_t sbStart, size_t sbEnd, s
 	int textPos = sbStart;
 	int armPos = 0;
 
-
+	//Pattern suchen
 	while(textPos < sbEnd+1 && textPos < raStart+raLen)
 	{
 		while(armPos != -1 && (armPos == raLen || rArm[armPos] != text[textPos])) armPos = lcs[armPos];
@@ -495,13 +479,13 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 				lastPos = 0;
 				p=0;
 
-
+				//Laeufe und Periode bestimmen
 				occs = new vector<int>(leftArms.size(),0);
 				for ( size_t h = 0; h < leftArms.size() ; h++ ){
 
 					if ( h == leftArms.size()-1 ){ //Grenzfall: letzter Wert, leftArms[h] == raBegin
 						if ( leftArms[h] >= lastPos ){ //liegt nicht im vorherigen run, also auf neuen run pruefen
-							if ( p==-1 || leftArms[h]+p >= lce->length || lcPrefix(lce, leftArms[h], leftArms[h]+p) < p ){
+							if ( p==0 || leftArms[h]+p >= lce->length || lcPrefix(lce, leftArms[h], leftArms[h]+p) < p ){
 								(*occs)[h] = -1;
 								
 							}
@@ -799,7 +783,7 @@ int calcSQUARES (lceDataStructure*& lce, vector<alphaGappedRepeat*> *grList, boo
 
 					if ( h == leftArms.size()-1 ){ //Grenzfall: letzter Wert, leftArms[h] == raBegin
 						if ( leftArms[h] >= lastPos ){ //liegt nicht im vorherigen run, also auf neuen run pruefen
-							if ( p==-1 || leftArms[h]+p >= lce->length || lcPrefix(lce, leftArms[h], leftArms[h]+p) < p ){
+							if ( p==0 || leftArms[h]+p >= lce->length || lcPrefix(lce, leftArms[h], leftArms[h]+p) < p ){
 								(*occs)[h] = -1;
 								
 							}
@@ -911,7 +895,6 @@ vector<int> calcBlockRep (lceDataStructure*& lce){
 	//Bestimme Blockrepraesentation
 	for(size_t i = 0; i <= size/log2(size)+1; i++){
 		blockRep.push_back( clusters[lce->isa[i*log2(size)]] );
-		//xxxxxxxxxx//blockRep.push_back(lce.isa[i*log2(size)]);
 	}
 	return blockRep;
 }
@@ -919,7 +902,6 @@ vector<int> calcBlockRep (lceDataStructure*& lce){
 
 //Berechnet k-Bloecke auf w fuer fixes k
 //template<typename vektor_type>
-//TODO k benutzen
 vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 	size_t size = lce->length;
 	double lgn = log2((double)size);
@@ -927,25 +909,10 @@ vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 	vector<int> blockRep;
 	blockRep.reserve(size/ ( (1<<k) * log2(size)) +1 );
 
-	//vector<int> clusters(size);
-	//clusters[0]=0;
-	/*
-	//Cluster des Suffix-Arrays bestimmen
-	for(size_t i = 1; i < size; i++){
-		if( lce->sa[i] > lgn ){
-			clusters[i] = clusters[i-1];
-		}
-		else{
-			clusters[i] = clusters[i-1]+1;
-		}
-	}
-	*/
 	
-	//Bestimme Blockrepraesentation
+	//Bestimme k-Bloecke
 	for(size_t i = 0; i <= size/ ( (1<<k) * log2(size)) +1; i++){
-		//TODO so richtig?
 		blockRep.push_back( i*(1<<k)*log2(size) );
-		//xxxxxxxxxxxxxxx//blockRep.push_back(lce.isa[i*log2(size)]);
 	}
 	return blockRep;
 }
@@ -959,29 +926,15 @@ vector<int> calcKBlock (lceDataStructure*& lce, size_t k){
 int binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, size_t yStart, size_t yLength){
 	vector<int> arms;
 	size_t left = 0;
-	size_t right = lceBlock->length; //TODO richtig runden?
+	size_t right = lceBlock->length; 
 	size_t mid;
 	//size_t neighbour;
-	double lgn = log2((double)lce->length); //TODO runden?
+	double lgn = log2((double)lce->length); ?
 	while (left <= right){
 		mid = left + (( right - left) / 2);
 		if ( lcPrefix(lce,yStart,lce->text[mid*lgn]) >= yLength){
 			//Wert in Liste der Arme einfuegen
 			return mid*lgn;
-			//arms.push_back(mid*lgn);
-			/*
-			//Nachbarn untersuchen
-			neighbour = mid - 1;
-			while (lcPrefix(lce,yStart,lce->text[neighbour*lgn]) >= yLength && neighbour >= 0){
-				arms.push_back(neighbour*lgn);
-				neighbour--;
-			}
-			neighbour = mid + 1;
-			while (lcPrefix(lce,yStart,lce->text[neighbour*lgn]) >= yLength && neighbour <= lceBlock->length){
-				arms.push_back(neighbour*lgn);
-				neighbour++;
-			}
-			*/
 			
 		}
 		else {
@@ -999,7 +952,8 @@ int binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, size_t ySt
 
 
 
-//Funktion zur Berechnung alpha-gapped repeats mit kurzen Armen
+//Funktion zur Berechnung alpha-gapped repeats mit langen Armen
+//Funktioniert nicht
 template<typename lceDataStructure>
 int calcLongArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*> *grList){
 	size_t n = lce->length;
@@ -1009,38 +963,30 @@ int calcLongArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*
     string blockString = ss.str();
 	lceDataStructure* lceBlock = new lceDataStructure(blockString); //lce-ds auf string der block rep erstellen
 
-	size_t yStart;
+	size_t yStart;	//Startpostion rechter Arm
 	size_t yLength;
 	size_t y2; //Startposition von y'
 	size_t suffix;
 	size_t prefix;
 	alphaGappedRepeat* gappedRep;
-	vector<int> rightArms;
+	vector<int> leftArms;
 	vector<int> kBlocks;
 	for ( size_t k = 0; k <= (n/log2(n)); k++){
 		kBlocks = calcKBlock(lce, k);
 		for ( size_t i = 0; i < kBlocks.size(); i++){
 			for ( size_t start = 0; start < log2(n); start++ ){
-				// linken Arm y fixieren
+				// rechten Arm y fixieren
 				yStart = kBlocks[i] + start;
 				yLength = ((1<<k-1)) * log2(n);
 				
-				y2 = binarySearch(lce, lceBlock, yStart, yLength);
+				y2 = binarySearch(lce, lceBlock, yStart, yLength); //TODO erzeugt Speicherzugriffsfehler
 				if (y2 != -1){
-					//TODO yLenght korrigieren, es ist nicht die eigentliche laenge gefragt, sondern die in der blockrep
-					rightArms = kmpMatching (lceBlock, 0, lceBlock->length, y2, yLength);
-					for ( size_t j = 0; j < rightArms.size(); j++ ){
-						prefix = lcPrefix(lce, yStart, rightArms[j]);
-						suffix = lcSuffix(lce, yStart, rightArms[j]);
-						//TODO muessen Positionen noch um 1 verringert werden? Laenge richtig?
-						gappedRep = new alphaGappedRepeat(yStart-prefix, rightArms[j]-prefix, prefix+suffix);
-						//auf Gueltigkeit pruefen
-						//TODO auf alpha pruefen und ob der rechte Arm im richtigen kBlock z beginnt
-						if ( gappedRep->lArm + gappedRep->length < gappedRep->rArm 
-							&& (1<<k+1) <= gappedRep->length < (1<<k+2)){
-							grList->push_back(gappedRep);
-					}
-					//TODO if ( 2^(k+1) <= yLength < 2^(k+2) ){hinzufuegen}
+
+					leftArms = kmpMatching (lceBlock, 0, lceBlock->length, y2, yLength);
+					for ( size_t j = 0; j < leftArms.size(); j++ ){
+						/*
+						Arme verlaengern, pruefen und ausgeben wie in calcShortArm
+						*/
 					}
 				}
 			}
