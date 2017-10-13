@@ -3,7 +3,6 @@
 #include <sstream>
 #include <fstream>
 #include <math.h>
-//#include "strinalyze.cpp"
 #include <iomanip>
 #include <glog/logging.h>
 #include "substring.hpp"
@@ -20,15 +19,12 @@ int compare (const void * a, const void * b)
 {
   if ( *(double*)a <  *(double*)b ) return -1;
   if ( *(double*)a == *(double*)b ) return 0;
-//  if ( *(double*)a >  *(double*)b ) 
   return 1;
 }
 
 
 double median( double arr[]){
-    //cout << arr[0] << endl;
     qsort (arr, kAnzahl, sizeof(double), compare);
-    //cout << arr[0] << endl;
     return arr[kAnzahl/2];
 }
 
@@ -65,7 +61,7 @@ int main(){
     const char* textchar = text.c_str();
     size_t length = text.size();
     while(timeNaiv < timeLCPRMQ){                 //nur eine von beiden Schleifen
-    //while( x1 <= 10000){
+    //while( x1 <= 10000){							//Schleife für praktische Tests
         x1++;
         for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    
@@ -85,7 +81,7 @@ int main(){
     //Dauer fuer iterative Minimumsuche im LCP-Array
     size_t y1 = 0;
     while(timeLCP < timeLCPRMQ){
-	//while( y1 <= 10000){
+	//while( y1 <= 10000){							//Schleife für praktische Tests
         y1++;
         for(size_t k=0; k<kAnzahl; k++){
             tstart = clock();    

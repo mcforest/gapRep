@@ -3,7 +3,6 @@
 #include <sstream>
 #include <fstream>
 #include <math.h>
-//#include "strinalyze.cpp"
 #include <iomanip>
 #include <glog/logging.h>
 #include "substring.hpp"
@@ -51,7 +50,6 @@ int mainCalc1 ( string text, size_t alpha ){
                     if (length >= ceil((r-l)/(float)alpha)){
 						if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] 
 							|| l+length == r ){		//doppelte verhindern
-                        	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
 							gappedRep = new alphaGappedRepeat(l,r,length);
 							//grList.push_back(gappedRep); //auskommentiert fuer Messungen
 							delete gappedRep;
@@ -66,7 +64,6 @@ int mainCalc1 ( string text, size_t alpha ){
                     if (length >= ceil((r-l)/(float)alpha)){
                         if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] 
 							|| l+length == r ){		//doppelte verhindern
-                        	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
 							gappedRep = new alphaGappedRepeat(l,r,length);
 							//grList.push_back(gappedRep);	//auskommentiert fuer Messungen
 							delete gappedRep;
@@ -82,7 +79,6 @@ int mainCalc1 ( string text, size_t alpha ){
                     if (length >= ceil((r-l)/(float)alpha)){
                         if( stats.sa[i]==0 || stats.sa[j]==0 || text[stats.sa[i]-1] != text[stats.sa[j]-1] 
 							|| l+length == r ){		//doppelte verhindern
-                        	//cout << "("<<l<<","<<r<<","<<length<<")"<<endl;
 							gappedRep = new alphaGappedRepeat(l,r,length);
 							//grList.push_back(gappedRep);	//auskommentiert fuer Messungen
 							delete gappedRep;
@@ -133,7 +129,6 @@ int mainCalc3 ( string text, size_t alpha ){
 		n1++;
 	}
 
-	//string textX = text0;
 	for( size_t i = n0; i < n1; i++ ){
 		text = text + '\1';
 	}
@@ -187,6 +182,7 @@ int main(int argc, char *argv[]){
 			cout << "msa:  " << lce->msa << endl;
 			cout << "misa: " << lce->misa << endl;
 			cout << "mlcp: " << lce->mlcp << endl;
+
 			
 
 		}
@@ -216,8 +212,6 @@ int main(int argc, char *argv[]){
         return 1;
     }
     
-    //Textausgabe als Test
-    //cout << text << endl;
     
 	istringstream ss2(argv[3]);
 	string variante;
