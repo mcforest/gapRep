@@ -349,7 +349,7 @@ vector<int> kmpMatching (lceDataStructure*& lce, size_t sbStart, size_t sbEnd, s
 	vector<int> lArms;
 
 	//Pattern vorverarbeiten
-	for(int i = 1; i <= raLen; i++)
+	for(int i = 1; i <= (int)raLen; i++)
 	{
 		int pos = lcs[i - 1];
 		while(pos != -1 && rArm[pos] != rArm[i - 1]) pos = lcs[pos];
@@ -360,12 +360,12 @@ vector<int> kmpMatching (lceDataStructure*& lce, size_t sbStart, size_t sbEnd, s
 	int armPos = 0;
 
 	//Pattern suchen
-	while(textPos < sbEnd+1 && textPos < raStart+raLen)
+	while(textPos < (int)sbEnd+1 && textPos < (int)(raStart+raLen) )
 	{
-		while(armPos != -1 && (armPos == raLen || rArm[armPos] != text[textPos])) armPos = lcs[armPos];
+		while(armPos != -1 && (armPos == (int)raLen || rArm[armPos] != text[textPos])) armPos = lcs[armPos];
 		armPos++;
 		textPos++;
-		if(armPos == raLen) lArms.push_back(textPos - raLen);
+		if(armPos == (int)raLen) lArms.push_back(textPos - raLen);
 	}
 	return lArms;
 }
@@ -450,8 +450,8 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 				for ( size_t h = 0; h < leftArms.size() ; h++ ){
 
 					if ( h == leftArms.size()-1 ){ //Grenzfall: letzter Wert, leftArms[h] == raBegin
-						if ( leftArms[h] >= lastPos ){ //liegt nicht im vorherigen run, also auf neuen run pruefen
-							if ( p==0 || leftArms[h]+p >= lce->length || lcPrefix(lce, leftArms[h], leftArms[h]+p) < p ){
+						if ( leftArms[h] >= (int)lastPos ){ //liegt nicht im vorherigen run, also auf neuen run pruefen
+							if ( p==0 || leftArms[h]+p >= lce->length || lcPrefix(lce, leftArms[h], leftArms[h]+p) < (int)p ){
 								(*occs)[h] = -1;
 								
 							}
@@ -461,7 +461,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						}
 					}
 					else{
-						if ( leftArms[h] >= lastPos ){  //falls nicht im letzten run enthalten
+						if ( leftArms[h] >= (int)lastPos ){  //falls nicht im letzten run enthalten
 
 							ph = leftArms[h+1]-leftArms[h];
 							lcHelp = lcPrefix(lce, leftArms[h], leftArms[h]+ph);
@@ -473,7 +473,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 								lastPos = leftArms[h+1]+lcHelp;
 							}
 							//falls kein run, also single occ
-							else if (lcHelp < ph || lcPrefix(lce, leftArms[h], raBegin) < ph){
+							else if (lcHelp < ph || lcPrefix(lce, leftArms[h], raBegin) < (int)ph){
 								(*occs)[h] = -1;
 
 							}
@@ -490,7 +490,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 				}
 
 				
-				for ( size_t i = 0; i < leftArms.size() && leftArms[i] < raBegin; i++){
+				for ( size_t i = 0; i < leftArms.size() && leftArms[i] < (int)raBegin; i++){
 					// falls kein run
 					if ( (*occs)[i]==-1 || (*occs)[ (*occs).size()-1 ]==-1 ){
 
@@ -502,7 +502,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						
 						//auf negative Luecke pruefen und s. "To avoid duplicates (S.15)"
 						//wenn gueltig: einfuegen
-						if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length && gappedRep->length < (1<<(k+2)) 
+						if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length && gappedRep->length < (size_t)(1<<(k+2)) 
 							&& j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) && j*(1<<k)+sbBegin >= gappedRep->rArm ){
 							//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
 						}
@@ -512,7 +512,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 					}
 
 					// periodischer Fall mit Fallunterscheidung
-					else if ( (*occs)[i] > 0 && (*occs)[i]==p ){
+					else if ( (*occs)[i] > 0 && (*occs)[i]==(int)p ){
 
 						laBegin = leftArms[i];
 						rLLength = findLongestPeriod(lce, laBegin, p);
@@ -525,7 +525,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						if ( rRLength > rLLength ){
 							gappedRep = new alphaGappedRepeat(laBegin, rRhoBegin+rRLength-rLLength , rLLength+s);
 							//pruefen und hinzufuegen
-							if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length && gappedRep->length < (1<<(k+2)) 
+							if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length && gappedRep->length < (size_t)(1<<(k+2)) 
 								&& j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) && j*(1<<k)+sbBegin >= gappedRep->rArm ){
 								//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
 							}
@@ -541,7 +541,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 								gappedRep = new alphaGappedRepeat( laBegin, rRhoBegin+rRLength-(helpLength-p*h) , 
 																	helpLength-p*h );
 								//pruefen und hinzufuegen
-								if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length && gappedRep->length < (1<<(k+2))
+								if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length && gappedRep->length < (size_t)(1<<(k+2))
 									&&	j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) && j*(1<<k)+sbBegin >= gappedRep->rArm ){
 									//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
 								}
@@ -554,7 +554,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						for (size_t h = 1; rLLength+p*h<=rRLength && rRhoBegin+p*h-laBegin <= alpha*rLLength; h++){
 							gappedRep = new alphaGappedRepeat(laBegin, rRhoBegin+p*h, rLLength);
 							//pruefen und hinzufuegen
-							if ( isValid(gappedRep,alpha) && (1<<(k+1))<=gappedRep->length && gappedRep->length<(1<<(k+2))
+							if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1))<=gappedRep->length && gappedRep->length<(size_t)(1<<(k+2))
 								&& j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) 
 								&& j*(1<<k)+sbBegin >= gappedRep->rArm ){
 								//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
@@ -567,7 +567,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						helpLength = min(rLLength,rRLength)/p;
 						gappedRep = new alphaGappedRepeat(laBegin+rLLength-helpLength, rRhoBegin, helpLength);
 						//pruefen und hinzufuegen
-						if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length && gappedRep->length < (1<<(k+2)) 
+						if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length && gappedRep->length < (size_t)(1<<(k+2)) 
 							&& j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) && j*(1<<k)+sbBegin >= gappedRep->rArm ){
 							//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
 						}
@@ -577,7 +577,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						//case e
 						for (size_t h = 1; rRLength+p*h<=rLLength; h++){
 							gappedRep = new alphaGappedRepeat(laBegin+p*h, rRhoBegin, rRLength);
-							if ( isValid(gappedRep,alpha) && (1<<(k+1))<=gappedRep->length && gappedRep->length<(1<<(k+2))
+							if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1))<=gappedRep->length && gappedRep->length<(size_t)(1<<(k+2))
 								&& j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) 
 								&& j*(1<<k)+sbBegin >= gappedRep->rArm ){
 								//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
@@ -591,7 +591,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						if (rLLength > rRLength){
 							gappedRep = new alphaGappedRepeat(laBegin+rLLength+-rRLength, rRhoBegin, rRLength+s);
 							//pruefen und hinzufuegen
-							if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length && gappedRep->length < (1<<(k+2))
+							if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length && gappedRep->length < (size_t)(1<<(k+2))
 								&& j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) && j*(1<<k)+sbBegin >= gappedRep->rArm ){
 								//grList->push_back(gappedRep);	//auskommentiert fuer MessungenO
 							}
@@ -605,7 +605,7 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 							gappedRep = new alphaGappedRepeat(laBegin-a, rRhoBegin-a, helpLength);
 						
 							//pruefen und hinzufuegen
-							if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length && gappedRep->length < (1<<(k+2))
+							if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length && gappedRep->length < (size_t)(1<<(k+2))
 								&& j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) && j*(1<<k)+sbBegin >= gappedRep->rArm ){
 								//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
 							}
@@ -626,8 +626,8 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						for ( size_t h = 0; h <= rRLength -2; h++){ //Schleife ueber Position
 							for ( size_t g = 1; (h+g) +g <= rRLength ; g++){ //Schleife ueber Laenge
 								gappedRep = new alphaGappedRepeat(rRhoBegin+h, rRhoBegin+h+g, g);
-								if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length 
-									&& gappedRep->length < (1<<(k+2)) && j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) 
+								if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length 
+									&& gappedRep->length < (size_t)(1<<(k+2)) && j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) 
 									&& j*(1<<k)+sbBegin >= gappedRep->rArm ){
 									//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
 								}
@@ -640,8 +640,8 @@ int calcShortArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat
 						//for (size_t h = 1; h < ((float)rRLength/p)/2 ; h++){
 						for (size_t h = rRLength/(p*(alpha+1)); h < ((float)rRLength/p)/2 ; h++){
 							gappedRep = new alphaGappedRepeat(rRhoBegin, rRhoBegin+rRLength-h*p, h*p );
-							if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length 
-								&& gappedRep->length < (1<<(k+2)) && j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k)
+							if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length 
+								&& gappedRep->length < (size_t)(1<<(k+2)) && j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k)
 								&& j*(1<<k)+sbBegin >= gappedRep->rArm ){
 								//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
 							}
@@ -735,8 +735,8 @@ int calcSQUARES (lceDataStructure*& lce, vector<alphaGappedRepeat*> *grList, boo
 				for ( size_t h = 0; h < leftArms.size() ; h++ ){
 
 					if ( h == leftArms.size()-1 ){ //Grenzfall: letzter Wert, leftArms[h] == raBegin
-						if ( leftArms[h] >= lastPos ){ //liegt nicht im vorherigen run, also auf neuen run pruefen
-							if ( p==0 || leftArms[h]+p >= lce->length || lcPrefix(lce, leftArms[h], leftArms[h]+p) < p ){
+						if ( leftArms[h] >= (int)lastPos ){ //liegt nicht im vorherigen run, also auf neuen run pruefen
+							if ( p==0 || leftArms[h]+p >= lce->length || lcPrefix(lce, leftArms[h], leftArms[h]+p) < (int)p ){
 								(*occs)[h] = -1;
 								
 							}
@@ -746,7 +746,7 @@ int calcSQUARES (lceDataStructure*& lce, vector<alphaGappedRepeat*> *grList, boo
 						}
 					}
 					else{
-						if ( leftArms[h] >= lastPos ){  //falls nicht im letzten run enthalten
+						if ( leftArms[h] >= (int)lastPos ){  //falls nicht im letzten run enthalten
 
 							ph = leftArms[h+1]-leftArms[h];
 							lcHelp = lcPrefix(lce, leftArms[h], leftArms[h]+ph);
@@ -758,7 +758,7 @@ int calcSQUARES (lceDataStructure*& lce, vector<alphaGappedRepeat*> *grList, boo
 								lastPos = leftArms[h+1]+lcHelp;
 							}
 							//falls kein run, also single occ
-							else if (lcHelp < ph || lcPrefix(lce, leftArms[h], raBegin) < ph){
+							else if (lcHelp < ph || lcPrefix(lce, leftArms[h], raBegin) < (int)ph){
 								(*occs)[h] = -1;
 
 							}
@@ -775,7 +775,7 @@ int calcSQUARES (lceDataStructure*& lce, vector<alphaGappedRepeat*> *grList, boo
 				}
 
 				
-				for ( size_t i = 0; i < leftArms.size() && leftArms[i] < raBegin; i++){
+				for ( size_t i = 0; i < leftArms.size() && leftArms[i] < (int)raBegin; i++){
 					// falls kein run
 
 
@@ -794,8 +794,8 @@ int calcSQUARES (lceDataStructure*& lce, vector<alphaGappedRepeat*> *grList, boo
 						for ( size_t h = 0; h <= rRLength -2; h++){ //Schleife ueber Position
 							for ( size_t g = 1; (h+g) +g <= rRLength ; g++){ //Schleife ueber Laenge
 								gappedRep = new alphaGappedRepeat(rRhoBegin+h, rRhoBegin+h+g, g);
-								if ( isValid(gappedRep,alpha) && (1<<(k+1)) <= gappedRep->length 
-									&& gappedRep->length < (1<<(k+2)) && j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) 
+								if ( isValid(gappedRep,alpha) && (size_t)(1<<(k+1)) <= gappedRep->length 
+									&& gappedRep->length < (size_t)(1<<(k+2)) && j*(1<<k)+sbBegin < gappedRep->rArm+(1<<k) 
 									&& j*(1<<k)+sbBegin >= gappedRep->rArm ){
 									//grList->push_back(gappedRep);	//auskommentiert fuer Messungen
 								}
@@ -884,7 +884,7 @@ int binarySearch(lceDataStructure*& lce, lceDataStructure*& lceBlock, size_t ySt
 	double lgn = log2((double)lce->length);
 	while (left <= right){
 		mid = left + (( right - left) / 2);
-		if ( lcPrefix(lce,yStart,lce->text[mid*lgn]) >= yLength){
+		if ( lcPrefix(lce,yStart,lce->text[mid*lgn]) >= (int)yLength){
 			//Wert in Liste der Arme einfuegen
 			return mid*lgn;
 			
@@ -917,7 +917,7 @@ int calcLongArm (lceDataStructure*& lce, size_t alpha, vector<alphaGappedRepeat*
 
 	size_t yStart;	//Startpostion rechter Arm
 	size_t yLength;
-	size_t y2; //Startposition von y'
+	int y2; //Startposition von y'
 	//size_t suffix;
 	//size_t prefix;
 	alphaGappedRepeat* gappedRep;
